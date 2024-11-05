@@ -74,11 +74,12 @@ export default {
     },
     updateValue(row) {
       // 更新值并记录
-      // row.value = row.newValue;
 
       // 发送更新的值到父组件
       console.log({ param: row.param, newValue: row.newValue })
       this.$emit('update-value', { param: row.param, newValue: row.newValue });
+      row.newValue = '';
+
     }
   },
   components: {

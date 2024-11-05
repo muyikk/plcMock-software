@@ -71,7 +71,7 @@ export default defineConfig(({ command }) => {
     })(),
     clearScreen: false,
     optimizeDeps: {
-      exclude: ['node-opcua', 'modbus-serial'],
+      exclude: ['node-opcua'],
     },
   }
 })
