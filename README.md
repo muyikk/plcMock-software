@@ -27,7 +27,7 @@ plc模拟程序v1.0.0
 1、编辑自定义的opcua-data.json文件
 ```json
 {
-  "name": "modbus",
+  "name": "opcua",
   "ip": "127.0.0.1",
   "port": 4334,
   "structure": "stCCD",
