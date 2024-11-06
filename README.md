@@ -1,12 +1,29 @@
 # kl-mockplc
-模拟plc服务器的脚本，可以自定义plc的结构体、变量。<br>兼容`opcua`、`modbus(待实现)`协议<br>并且实现变量的 `心跳`、`监听值并作出反馈`、`自增`、`自减`功能
+模拟plc服务器的程序，可以自定义plc的结构体、变量。<br>兼容`opcua`、`modbus(待实现)`协议<br>并且实现设置变量的 `心跳`、`监听值并作出反馈`、`自增`、`自减`功能<br>启动服务后能够实时监控和修改所有变量的值
 
-https://github.com/muyikk/kl-mockPLC
+https://github.com/muyikk/plcMock-software
 ### 一、服务名称
-plc模拟服务器v1.0.0
+plc模拟程序v1.0.0
 	
 ### 二、使用方式
-1、编辑自定义的mockPLC.json文件
+1.编辑基础设置（ip、端口、结构体）<br>
+2.设置参数列表<br>
+3.设置参数特性，如：心跳、监听、自增、自减 （可选）<br>
+#### 心跳设置
+![image](https://github.com/muyikk/plcMock-software/IMAGE/pic1.png)
+心跳将会在`值1`和`值2`之间以`间隔时间`反复变化
+#### 监听设置
+![image](https://github.com/muyikk/plcMock-software/IMAGE/pic2.png)
+当监听到`参数名`的值变成`参数值`时，`被改变的参数名`的值会变为`被改变的值`
+#### 自增设置
+![image](https://github.com/muyikk/plcMock-software/IMAGE/pic3.png)
+`参数名`的值会以`自增公差`，以`时间间隔`进行递增
+#### 自减设置
+同***自增设置***
+#### 实时监控
+![image](https://github.com/muyikk/plcMock-software/IMAGE/pic4.png)
+### 三、编辑config文件（可选）
+1、编辑自定义的opcua-data.json文件
 ```json
 {
 	"protocol": "opcua",  // 服务器类型
