@@ -43,17 +43,16 @@
 
           <el-table-column fixed="right" min-width="80" align="center">
             <template v-slot="scope">
-              <el-button @click="addForm(addParams)" type="text" size="small">
+              <el-button @click.prevent="addForm(addParams)" type="text" size="small">
                 新增
               </el-button>
             </template>
           </el-table-column>
 
-          <el-table-column fixed="right" min-width="80" align="center">
+          <el-table-column fixed="right" width="80" align="center">
             <template v-slot="scope">
-              <el-button @click="remove(addParams, scope.row)" type="text" size="small" style="color: red;">
-                移除
-              </el-button>
+              <el-button @click.prevent="remove(addParams, scope.$index)" type="text" size="small"
+                style="color: red;">移除</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -321,6 +320,7 @@ export default {
     },
     // 删除操作
     remove(fromData, index) {
+    console.log(fromData,index)
       if (fromData.length <= 1) {
         return;
       }
