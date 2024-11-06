@@ -5,23 +5,35 @@ import fs from "fs";
 import path from "path";
 
 class Service {
-  win: any;
-  utiles: Utiles;
-  OPCUAServer: MockOPCUA;
-  polling_interval: any;
+	win: any;
+	utiles: Utiles;
+	OPCUAServer: MockOPCUA;
+	polling_interval: any;
 	constructor(win) {
-    this.win = win
-    this.utiles = new Utiles()
+		this.win = win
+		this.utiles = new Utiles()
+		this.initOPCUA();
 		this.saveOPCUA();
-    this.loadOPCUA();
-    this.startOPCUA();
-    this.closeOPCUA();
-    this.updateOPCUA();
-    this.polling()
+		this.loadOPCUA();
+		this.startOPCUA();
+		this.closeOPCUA();
+		this.updateOPCUA();
+		this.polling()
 	}
-  /**
-   * 保存OPCUA服务参数
-   */
+
+	initOPCUA() {
+		ipcMain.on("initOPCUA", (event, messageString) => {
+			console.log('privateKey:', path.dirname(process.execPath) + `\\privateKey.pem`)
+			console.log('certificate:', path.dirname(process.execPath) + `\\certificate.pem`)
+			if (!fs.existsSync(path.dirname(process.execPath) + `privateKey.pem`) || !fs.existsSync(path.dirname(process.execPath) + `certificate.pem`)) {
+				this.utiles.runCommand();
+			}
+			event.reply("initOPCUA_response", { success: true });
+		})
+	}
+	/**
+	 * 保存OPCUA服务参数
+	 */
 	saveOPCUA() {
 		ipcMain.on("saveOPCUA", (event, messageString) => {
 			try {
@@ -53,16 +65,16 @@ class Service {
 			}
 		});
 	}
-  /**
-   * 读取OPCUA服务参数
-   */
-  loadOPCUA() {
-    ipcMain.on("loadOPCUA", (event, messageString) => {
+	/**
+	 * 读取OPCUA服务参数
+	 */
+	loadOPCUA() {
+		ipcMain.on("loadOPCUA", (event, messageString) => {
 			try {
-        const data = fs.readFileSync(messageString[0], 'utf-8');
+				const data = fs.readFileSync(messageString[0], 'utf-8');
 
-        // const jsonObject = JSON.parse(data);
-        event.reply("loadOPCUA_response", { data, success: true });
+				// const jsonObject = JSON.parse(data);
+				event.reply("loadOPCUA_response", { data, success: true });
 			} catch (error) {
 				console.error("Failed to read file:", error);
 				event.reply("loadOPCUA_response", {
@@ -71,18 +83,17 @@ class Service {
 				});
 			}
 		});
-  }
-  /**
-   * 启动OPCUA服务
-   */
-  startOPCUA() {
-    ipcMain.on("startOPCUA", (event, messageString) => {
+	}
+	/**
+	 * 启动OPCUA服务
+	 */
+	startOPCUA() {
+		ipcMain.on("startOPCUA", (event, messageString) => {
 			try {
-        const config = this.utiles.cfgFormat2serFormat(JSON.parse(messageString))
-        this.OPCUAServer = new MockOPCUA(config)
-        console.log(1111111111)
-        // const jsonObject = JSON.parse(data);
-        event.reply("startOPCUA_response", { success: true });
+				const config = this.utiles.cfgFormat2serFormat(JSON.parse(messageString))
+				this.OPCUAServer = new MockOPCUA(config)
+				// const jsonObject = JSON.parse(data);
+				event.reply("startOPCUA_response", { success: true });
 			} catch (error) {
 				console.error("Failed to read file:", error);
 				event.reply("startOPCUA_response", {
@@ -91,16 +102,16 @@ class Service {
 				});
 			}
 		});
-  }
-  /**
-   * 关闭OPCUA服务
-   */
-  closeOPCUA() {
-    ipcMain.on("closeOPCUA", (event, messageString) => {
+	}
+	/**
+	 * 关闭OPCUA服务
+	 */
+	closeOPCUA() {
+		ipcMain.on("closeOPCUA", (event, messageString) => {
 			try {
-        this.polling_interval ? clearInterval(this.polling_interval) : null
-        this.OPCUAServer.destroy()
-        event.reply("closeOPCUA_response", { success: true });
+				this.polling_interval ? clearInterval(this.polling_interval) : null
+				this.OPCUAServer.destroy()
+				event.reply("closeOPCUA_response", { success: true });
 			} catch (error) {
 				console.error("Failed to read file:", error);
 				event.reply("closeOPCUA_response", {
@@ -109,18 +120,18 @@ class Service {
 				});
 			}
 		});
-  }
-  /**
-   * 更新OPCUA数据
-   */
-  updateOPCUA() {
-    ipcMain.on("updateOPCUA", (event, { param, newValue }) => {
+	}
+	/**
+	 * 更新OPCUA数据
+	 */
+	updateOPCUA() {
+		ipcMain.on("updateOPCUA", (event, { param, newValue }) => {
 			try {
-        console.log(param, newValue)
-        this.OPCUAServer.mockParams[param].value = Number(newValue)
-        this.OPCUAServer.listen()
-        // console.log(this.OPCUAServer.mockParams)
-        event.reply("updateOPCUA_response", { success: true });
+				console.log(param, newValue)
+				this.OPCUAServer.mockParams[param].value = Number(newValue)
+				this.OPCUAServer.listen()
+				// console.log(this.OPCUAServer.mockParams)
+				event.reply("updateOPCUA_response", { success: true });
 			} catch (error) {
 				console.error("Failed to read file:", error);
 				event.reply("updateOPCUA_response", {
@@ -129,19 +140,19 @@ class Service {
 				});
 			}
 		});
-  }
-  /**
-   * 轮询数据
-   */
-  polling() {
-    ipcMain.on("pollingOPCUA", (event, messageString) => {
+	}
+	/**
+	 * 轮询数据
+	 */
+	polling() {
+		ipcMain.on("pollingOPCUA", (event, messageString) => {
 			try {
-        this.polling_interval ? clearInterval(this.polling_interval) : null
-        this.polling_interval = setInterval(() => {
-            // console.log(this.OPCUAServer.mockParams)
-            this.win.webContents.send("pollingOPCUA_response", { success: true, polling: this.OPCUAServer.mockParams});
-            // event.reply("pollingOPCUA_response", { success: true, polling: this.OPCUAServer.mockParams});
-          }, 200)
+				this.polling_interval ? clearInterval(this.polling_interval) : null
+				this.polling_interval = setInterval(() => {
+					// console.log(this.OPCUAServer.mockParams)
+					this.win.webContents.send("pollingOPCUA_response", { success: true, polling: this.OPCUAServer.mockParams });
+					// event.reply("pollingOPCUA_response", { success: true, polling: this.OPCUAServer.mockParams});
+				}, 200)
 			} catch (error) {
 				console.error("Failed to read file:", error);
 				event.reply("pollingOPCUA_response", {
@@ -150,7 +161,7 @@ class Service {
 				});
 			}
 		});
-  }
+	}
 }
 
 export default Service;

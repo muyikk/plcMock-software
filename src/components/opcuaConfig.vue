@@ -12,6 +12,7 @@
         <div class="input">
           <label class="input-label">结构体:</label>
           <el-input v-model="structure" type="text" placeholder="stCCD" style="width: 200px" />
+          <!-- <el-button @click="initOPCUA" type="primary">初始化</el-button> -->
         </div>
       </div>
       <el-divider class="divider" />
@@ -325,6 +326,9 @@ export default {
       }
       fromData.splice(index, 1);
     },
+    initOPCUA() {
+      window.ipcRenderer.initOPCUA()
+    },
     save() {
       this.loading.save = true;
       // 超过5s超时报警
@@ -388,6 +392,16 @@ export default {
     },
   },
   mounted() {
+    window.ipcRenderer.onInitOPCUAResponse((response) => {
+      if (response.success) {
+        console.log('OPCUA param init successfully!');
+        ElNotification({
+          title: '成功',
+          message: 'OPCUA服务初始化完成',
+          type: 'success'
+        });
+      }
+    });
     window.ipcRenderer.onPollingOPCUAResponse((response) => {
       if (response.success) {
         this.pollingParams = response.polling

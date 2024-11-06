@@ -48,7 +48,7 @@ async function createWindow() {
     title: 'plcMock',
     width: 900,
     height: 650,
-    icon: path.join(process.env.VITE_PUBLIC, 'favicon.ico'),
+    icon: path.join(process.env.VITE_PUBLIC, 'icon.ico'),
     webPreferences: {
       preload,
       // Warning: Enable nodeIntegration and disable contextIsolation is not secure in production
@@ -101,7 +101,6 @@ app.on('second-instance', () => {
 
 app.on('activate', () => {
   const allWindows = BrowserWindow.getAllWindows()
-  allWindows.setTitle("plcMock");
   
   if (allWindows.length) {
     allWindows[0].focus()

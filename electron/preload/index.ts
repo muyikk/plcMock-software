@@ -2,6 +2,9 @@ import { ipcRenderer, contextBridge } from 'electron'
 
 // --------- Expose some API to the Renderer process ---------
 contextBridge.exposeInMainWorld('ipcRenderer', {
+  initOPCUA: (message) => ipcRenderer.send('initOPCUA', message),
+  onInitOPCUAResponse: (callback) => ipcRenderer.on('initOPCUA_response', (event, arg) => callback(arg)),
+
   saveOPCUA: (message) => ipcRenderer.send('saveOPCUA', message),
   onSaveOPCUAResponse: (callback) => ipcRenderer.on('saveOPCUA_response', (event, arg) => callback(arg)),
 
