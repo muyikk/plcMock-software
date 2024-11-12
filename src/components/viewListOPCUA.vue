@@ -1,6 +1,6 @@
 <template>
   <el-table :data="localParams" style="width: 100%">
-    <el-table-column prop="param" label="参数名" width="150" align="left">
+    <el-table-column prop="param" label="参数名" width="150" align="center">
       <template v-slot="scope">
         <el-input v-model="scope.row.param" disabled></el-input>
       </template>
@@ -10,7 +10,7 @@
         <el-input v-model="scope.row.type" disabled></el-input>
       </template>
     </el-table-column>
-    <el-table-column prop="value" label="值" width="200" align="right">
+    <el-table-column prop="value" label="值" width="200" align="center">
       <template v-slot="scope">
         <el-input v-model="scope.row.value" disabled></el-input>
       </template>

@@ -1,27 +1,44 @@
-import { ModbusRTU } from "modbus-serial";
+import { ServerTCP } from "modbus-serial";
 
-class MockModbusTCP {
-	constructor() {
-		this.port;
-		this.unitID;
-		this.mockParams;
-		this.configParams;
-		this.test;
+export class MockModbus {
+	server
+	port
+	unitID
+	mockParams
+	configParams
+	byteOrder
+	test
+	listenList; // 监听缓存值
+	listens; // 监听设置
+	heartBeats; // 心跳设置
+	increaseList; // 递增设置
+	decreaseList; // 递减设置
+	constructor(config) {
+		this.port = config.port;
+		this.unitID = config.unitID;
+		this.byteOrder = config.byteOrder == 'CDAB' ? true : false;
+		this.configParams = config.params;
+		this.mockParams = this.initParam();
+		this.listenList = this.getListenList(config.listens);
+		this.listens = config.listens;
+		this.heartBeats = config.hearts;
+		this.increaseList = config.increase;
+		this.decreaseList = config.decrease;
+		this.start()
 	}
 
-initService(config) {
-
-	this.port = Number(config.port);
-	// this.unitID = Number(config?.unitID ? config?.unitID : 1); // 是否设置该参数，如果没有默认为1
-	this.configParams = config.params;
-	this.mockParams = this.initParam();
-	// this.listenList = this.getListenList(config.listens);
-	// this.listens = config.listens;
-	// this.heartBeats = config.hearts;
-	// this.increaseList = config.increase;
-	// this.decreaseList = config.decrease;
-	// this.initServer(this.port, this.unitID);
-}
+	/**
+	 * 初始化监听缓存值
+	 * @param {Object} listens 监听规则对象
+	 * @returns 
+	 */
+	getListenList(listens) {
+		let listenList = {};
+		for (let listen in listens) {
+			listenList[listen] = this.mockParams[listen]?.value;
+		}
+		return listenList;
+	}
 
 	/**
 	 * 创建服务器
@@ -29,21 +46,32 @@ initService(config) {
 	start() {
 		const vector = this.getVector(this.mockParams);
 
-		new ModbusRTU.ServerTCP(
+		this.server = new ServerTCP(
 			vector,
 			{
 				host: "0.0.0.0", // 服务器地址
 				port: this.port, // 端口，默认为 502
 				debug: true, // 启用调试模式以输出更多信息
 				unitID: this.unitID, // Modbus 单元标识符，默认设置为1
-			},
-			(err) => {
-				if (err) {
-					console.error("Modbus TCP Server Error: ", err);
-				}
 			}
 		);
 	}
+	/**
+	 * 关闭服务器
+	 */
+	destroy() {
+    if (this.server) {
+        this.server.close((err) => {
+            if (err) {
+                console.error("Error closing the Modbus server:", err);
+            } else {
+                console.log("Modbus server closed successfully.");
+            }
+        });
+    } else {
+        console.log("Modbus server is not running.");
+    }
+}
 
 	/**
 	 * 定义服务器响应向量
@@ -51,7 +79,6 @@ initService(config) {
 	 */
 	getVector(mockParams) {
 		return {
-			mockParams: mockParams,
 			/**
 			 * 将 float型 转化为 IEEE 754 单精度浮点数
 			 * @param {number} floatValue float型的值
@@ -81,12 +108,13 @@ initService(config) {
 			 */
 			IEEE2float: function (addr, swap) {
 				let addrP;
-				if (addr.match(/\d+/)) {
+				let match = addr.match(/\d+/);
+				if (match) {
 					let num = parseInt(match[0], 10);
 					addrP = addr.replace(num, num + 1);
 				}
-				let high = this.mockParams[addr]; // 高 16 位寄存器值
-				let low = this.mockParams[addrP]; // 低 16 位寄存器值
+				let high = mockParams[addr]; // 高 16 位寄存器值
+				let low = mockParams[addrP]; // 低 16 位寄存器值
 
 				// 是否需要交换高低位的值
 				if (swap) {
@@ -103,14 +131,14 @@ initService(config) {
 				return floatValue;
 			},
 			getInputRegister: function (addr, unitID) {
-				// console.log("Read to register", addr, this.mockParams[addr]);
+				// console.log("Read to register", addr, mockParams[addr]);
 				// 返回输入寄存器的值
 				return addr;
 			},
 			getHoldingRegister: function (addr, unitID) {
-				// console.log("Read to register", addr, this.mockParams);
+				// console.log("Read to register", addr, mockParams);
 				// 返回保持寄存器的值
-				return this.mockParams[addr];
+				return mockParams[addr];
 			},
 			getCoil: function (addr, unitID) {
 				// 返回线圈的状态，偶数地址为 true，奇数地址为 false
@@ -118,9 +146,9 @@ initService(config) {
 			},
 			setRegister: function (addr, value, unitID) {
 				// 写入保持寄存器的值
-				this.mockParams[addr] = value;
+				mockParams[addr] = value;
 				// this.test = value
-				console.log(this.mockParams);
+				console.log(mockParams);
 				console.log("Write to register", addr, value);
 			},
 			setCoil: function (addr, value, unitID) {
@@ -156,13 +184,13 @@ initService(config) {
 						let num = parseInt(match[0], 10);
 						addrP = addr.replace(num, num + 1);
 					}
-					let ieee = this.float2IEEE(this.configParams[param].value, true);
+					let ieee = this.float2IEEE(this.configParams[param].value, this.byteOrder);
 					res[addr] = ieee[0];
 					res[addrP] = ieee[1];
 					break;
 			}
 		}
-		console.log(res);
+		// console.log(res);
 		return res;
 	}
 
@@ -187,6 +215,35 @@ initService(config) {
 		}
 		return [high, low];
 	}
-}
 
-module.exports = MockModbusTCP;
+		/**
+	 * 将 IEEE 754 单精度浮点数 转化为 float型
+	 * @param {number} addr 模拟寄存器中的地址
+	 * @param {number} swap 是否需要交换高低位
+	 * @returns
+	 */
+		IEEE2float(addr, swap) {
+			let addrP;
+			let match = addr.match(/\d+/);
+			if (match) {
+				let num = parseInt(match[0], 10);
+				addrP = addr.replace(num, num + 1);
+			}
+			let high = this.mockParams[addr]; // 高 16 位寄存器值
+			let low = this.mockParams[addrP]; // 低 16 位寄存器值
+	
+			// 是否需要交换高低位的值
+			if (swap) {
+				[high, low] = [low, high];
+			}
+	
+			// 创建 4 字节缓冲区，将寄存器值按大端序写入
+			let buffer = Buffer.alloc(4);
+			buffer.writeUInt16BE(high, 0); // 高位寄存器
+			buffer.writeUInt16BE(low, 2); // 低位寄存器
+	
+			// 从缓冲区读取浮点数
+			let floatValue = buffer.readFloatBE(0);
+			return floatValue;
+		}
+}

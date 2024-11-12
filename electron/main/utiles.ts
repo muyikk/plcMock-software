@@ -38,7 +38,8 @@ export class Utiles {
       name: format1.name,
       ip: format1.ip,
       port: format1.port.toString(), // 转换为字符串
-      structure: format1.structure,
+      structure: format1?.structure,
+      byteOrder: format1?.byteOrder,
       params: {},
       hearts: {},
       listens: {},
@@ -50,6 +51,7 @@ export class Utiles {
     format1.mockParams.forEach(param => {
       format2.params[param.param] = {
         type: param.type,
+        addr: param?.addr,
         value: Number(param.value),
       };
     });
@@ -105,7 +107,8 @@ export class Utiles {
       name: format2.name,
       ip: format2.ip,
       port: Number(format2.port), // 转换为数字
-      structure: format2.structure,
+      structure: format2?.structure,
+      byteOrder: format2?.byteOrder,
       mockParams: [],
       hearts: [],
       listens: [],
@@ -118,6 +121,7 @@ export class Utiles {
       format1.mockParams.push({
         param: key,
         type: value.type,
+        addr: value?.type,
         value: String(value.value),
       });
     }

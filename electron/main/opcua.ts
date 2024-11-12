@@ -34,8 +34,8 @@ export class MockOPCUA {
 		this.server = new OPCUAServer({
 			port: this.port,
 			resourcePath: "/mockPLC",
-			// certificateFile: "./certificate.pem",
-			// privateKeyFile: "./privateKey.pem",
+			certificateFile: "./certificate.pem",
+			privateKeyFile: "./privateKey.pem",
 		});
 		await this.server.initialize();
 
@@ -135,7 +135,7 @@ export class MockOPCUA {
 	getListenList(listens) {
 		let listenList = {};
 		for (let listen in listens) {
-			listenList[listen] = this.mockParams[listen].value;
+			listenList[listen] = this.mockParams[listen]?.value;
 		}
 		return listenList;
 	}

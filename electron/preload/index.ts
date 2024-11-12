@@ -22,6 +22,25 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
   
   pollingOPCUA: (message) => ipcRenderer.send('pollingOPCUA', message),
   onPollingOPCUAResponse: (callback) => ipcRenderer.on('pollingOPCUA_response', (event, arg) => callback(arg)),
+
+
+  saveModbus: (message) => ipcRenderer.send('saveModbus', message),
+  onSaveModbusResponse: (callback) => ipcRenderer.on('saveModbus_response', (event, arg) => callback(arg)),
+
+  loadModbus: (message) => ipcRenderer.send('loadModbus', message),
+  onLoadModbusResponse: (callback) => ipcRenderer.on('loadModbus_response', (event, arg) => callback(arg)),
+
+  startModbus: (message) => ipcRenderer.send('startModbus', message),
+  onStartModbusResponse: (callback) => ipcRenderer.on('startModbus_response', (event, arg) => callback(arg)),
+
+  closeModbus: (message) => ipcRenderer.send('closeModbus', message),
+  onCloseModbusResponse: (callback) => ipcRenderer.on('closeModbus_response', (event, arg) => callback(arg)),
+  
+  updateModbus: (message) => ipcRenderer.send('updateModbus', message),
+  onUpdateModbusResponse: (callback) => ipcRenderer.on('updateModbus_response', (event, arg) => callback(arg)),
+  
+  pollingModbus: (message) => ipcRenderer.send('pollingModbus', message),
+  onPollingModbusResponse: (callback) => ipcRenderer.on('pollingModbus_response', (event, arg) => callback(arg)),
   
 
   on(...args: Parameters<typeof ipcRenderer.on>) {

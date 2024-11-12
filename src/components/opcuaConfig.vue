@@ -220,7 +220,7 @@
     </el-icon></el-button>
 
   <el-drawer v-model="drawer" direction="btt" size="80%" title="I am the title" :with-header="false">
-    <viewList :params="pollingParams" @update-value="update" />
+    <viewListOPCUA :params="pollingParams" @update-value="update" />
   </el-drawer>
 
   <div class="footer">
@@ -240,11 +240,11 @@
 
 <script >
 import { ref, onUnmounted } from 'vue'
-import viewList from './viewList.vue'
+import viewListOPCUA from './viewListOPCUA.vue'
 import { ElNotification } from 'element-plus'
 export default {
   components: {
-    viewList,
+    viewListOPCUA,
   },
   data() {
     return {
