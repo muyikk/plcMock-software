@@ -200,7 +200,7 @@ export class MockModbus {
 	 * @param {number} swap 是否需要交换高低位
 	 * @returns
 	 */
-	float2IEEE(floatValue, swap) {
+	float2IEEE(floatValue, swap = true) {
 		// 创建一个 4 字节的缓冲区来存储浮点数
 		let buffer = Buffer.alloc(4);
 		buffer.writeFloatBE(floatValue, 0); // 将浮点数写入缓冲区，使用大端序
@@ -222,7 +222,7 @@ export class MockModbus {
 	 * @param {number} swap 是否需要交换高低位
 	 * @returns
 	 */
-		IEEE2float(addr, swap) {
+		IEEE2float(addr, swap = true) {
 			let addrP;
 			let match = addr.match(/\d+/);
 			if (match) {

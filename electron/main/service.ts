@@ -127,8 +127,18 @@ class Service {
 	updateModbus() {
 		ipcMain.on("updateModbus", (event, { param, newValue }) => {
 			try {
-				// console.log(param, newValue)
-				this.ModbusServer.mockParams[param].value = Number(newValue)
+				console.log(param, newValue, Number(newValue))
+				let params = this.ModbusServer.configParams
+				let ieees =  this.ModbusServer.mockParams
+				switch (params[param].type) {
+					case 'short': ieees[params[param].addr] = Number(newValue);break;
+					case 'float': 
+						let arr = this.ModbusServer.float2IEEE(Number(newValue));
+						ieees[params[param].addr] = arr[0];
+						ieees[(parseInt(params[param].addr) + 1).toString()] = arr[1];break;
+				}
+
+				// this.ModbusServer.mockParams[param].value = Number(newValue)
 				// this.ModbusServer.listen()
 				// console.log(this.ModbusServer.mockParams)
 				event.reply("updateModbus_response", { success: true });
@@ -150,15 +160,11 @@ class Service {
 				this.polling_intervalModbus ? clearInterval(this.polling_intervalModbus) : null
 				this.polling_intervalModbus = setInterval(() => {
 					let params = this.ModbusServer.configParams
-					let ieees = this.ModbusServer.mockParams
-					for(let key in params) {
-						if(ieees[params[key].addr] != undefined){
-							if(params[key].type == 'short') params[key].value = ieees[params[key].addr]
-							else if(params[key].type == 'float') params[key].value = this.ModbusServer.IEEE2float(params[key].addr, this.ModbusServer.byteOrder)
-						}
-					}
-					console.log(params)
-					this.win.webContents.send("pollingModbus_response", { success: true, polling: params });
+					let ieees =  this.ModbusServer.mockParams
+					let param = this.mergeData(params, ieees)
+					// console.log(ieees)
+					// console.log(param)
+					this.win.webContents.send("pollingModbus_response", { success: true, polling: param });
 					// event.reply("pollingModbus_response", { success: true, polling: this.ModbusServer.mockParams});
 				}, 200)
 			} catch (error) {
@@ -171,7 +177,33 @@ class Service {
 		});
 	}
 
-
+	mergeData(paramTypes, addrValues) {
+		const result = {};
+	
+		// 遍历每个参数
+		for (const [key, param] of Object.entries(paramTypes)) {
+			const newParam = { ...param };
+	
+			if (newParam.type === "short") {
+				// 如果是 short 类型，地址对应的值是一个
+				newParam.address = [{address: newParam.addr, value:addrValues[newParam.addr]}];
+				newParam.value = addrValues[newParam.addr];
+			} else if (newParam.type === "float") {
+				// 如果是 float 类型，地址占两位
+				const addr1 = newParam.addr;
+				const addr2 = (parseInt(addr1) + 1).toString(); // 假设 float 类型的地址是连续的
+				newParam.address = [
+					{	address: addr1, value: addrValues[addr1]}, {address: addr2, value: addrValues[addr2] }
+				]
+				newParam.value = this.ModbusServer.IEEE2float(addr1); // 保证 value 是 float 类型
+			}
+	
+			// 将整合后的参数保存到结果对象
+			result[key] = newParam;
+		}
+	
+		return result;
+	}
 
 	/**
 	 * todo 初始化opcua参数
