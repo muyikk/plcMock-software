@@ -19,7 +19,6 @@ export class MockModbus {
 		this.byteOrder = config.byteOrder == 'CDAB' ? true : false;
 		this.configParams = config.params;
 		this.mockParams = this.initParam();
-		this.listenList = this.getListenList(config.listens);
 		this.listens = config.listens;
 		this.heartBeats = config.hearts;
 		this.increaseList = config.increase;
@@ -28,18 +27,69 @@ export class MockModbus {
 	}
 
 	/**
-	 * 初始化监听缓存值
-	 * @param {Object} listens 监听规则对象
-	 * @returns 
+	 * 初始化心跳变量
 	 */
-	getListenList(listens) {
-		let listenList = {};
-		for (let listen in listens) {
-			listenList[listen] = this.mockParams[listen]?.value;
+	initHeartBeats() {
+		for (let heart in this.heartBeats) {
+			if (!this.configParams[heart]) {
+				console.log(`心跳参数 ${heart} 未初始化`)
+				continue
+			}
+			let data1 = this.heartBeats[heart].data1
+			let data2 = this.heartBeats[heart].data2
+			setInterval(() => {
+				if (this.getValueModbus(heart) == this.heartBeats[heart].data1)
+					this.setValueModbus(heart, data2);
+				else this.setValueModbus(heart, data1);
+			}, this.heartBeats[heart].interval);
 		}
-		return listenList;
 	}
 
+	/**
+	 * 初始化自增变量
+	 */
+	initIncreases() {
+		for (let increase in this.increaseList) {
+			if (!this.configParams[increase]) {
+				console.log(`自增参数 ${increase} 未初始化`)
+				continue
+			}
+			let tolerance = this.increaseList[increase].tolerance
+			setInterval(() => {
+				let data = this.getValueModbus(increase)
+				this.setValueModbus(increase, data + tolerance);
+			}, this.increaseList[increase].interval);
+		}
+	}
+
+	/**
+	 * 初始化自增变量
+	 */
+	initDecreases() {
+		for (let decrease in this.decreaseList) {
+			if (!this.configParams[decrease]) {
+				console.log(`自增参数 ${decrease} 未初始化`)
+				continue
+			}
+			let tolerance = this.decreaseList[decrease].tolerance
+			setInterval(() => {
+				let data = this.getValueModbus(decrease)
+				this.setValueModbus(decrease, data - tolerance);
+			}, this.decreaseList[decrease].interval);
+		}
+	}
+	/**
+	 * 初始化监听变量
+	 */
+	initListens() {
+		setInterval(() => {
+			for(let listen of this.listens) {
+				if (this.getValueModbus(listen.param) == listen.data){
+					this.setValueModbus(listen.changeParam, listen.changeValue)
+				} 
+			}
+		}, 200);
+	}
 	/**
 	 * 创建服务器
 	 */
@@ -55,23 +105,28 @@ export class MockModbus {
 				unitID: this.unitID, // Modbus 单元标识符，默认设置为1
 			}
 		);
+		// console.log(this.listenList)
+		this.initHeartBeats()
+		this.initIncreases()
+		this.initDecreases()
+		this.initListens()
 	}
 	/**
 	 * 关闭服务器
 	 */
 	destroy() {
-    if (this.server) {
-        this.server.close((err) => {
-            if (err) {
-                console.error("Error closing the Modbus server:", err);
-            } else {
-                console.log("Modbus server closed successfully.");
-            }
-        });
-    } else {
-        console.log("Modbus server is not running.");
-    }
-}
+		if (this.server) {
+			this.server.close((err) => {
+				if (err) {
+					console.error("Error closing the Modbus server:", err);
+				} else {
+					console.log("Modbus server closed successfully.");
+				}
+			});
+		} else {
+			console.log("Modbus server is not running.");
+		}
+	}
 
 	/**
 	 * 定义服务器响应向量
@@ -148,7 +203,7 @@ export class MockModbus {
 				// 写入保持寄存器的值
 				mockParams[addr] = value;
 				// this.test = value
-				console.log(mockParams);
+				// console.log(mockParams);
 				console.log("Write to register", addr, value);
 			},
 			setCoil: function (addr, value, unitID) {
@@ -198,7 +253,7 @@ export class MockModbus {
 	 * 将 float型 转化为 IEEE 754 单精度浮点数
 	 * @param {number} floatValue float型的值
 	 * @param {number} swap 是否需要交换高低位
-	 * @returns
+	 * @returns {Array<number>} [high, low]
 	 */
 	float2IEEE(floatValue, swap = true) {
 		// 创建一个 4 字节的缓冲区来存储浮点数
@@ -216,34 +271,64 @@ export class MockModbus {
 		return [high, low];
 	}
 
-		/**
-	 * 将 IEEE 754 单精度浮点数 转化为 float型
-	 * @param {number} addr 模拟寄存器中的地址
-	 * @param {number} swap 是否需要交换高低位
-	 * @returns
-	 */
-		IEEE2float(addr, swap = true) {
-			let addrP;
-			let match = addr.match(/\d+/);
-			if (match) {
-				let num = parseInt(match[0], 10);
-				addrP = addr.replace(num, num + 1);
-			}
-			let high = this.mockParams[addr]; // 高 16 位寄存器值
-			let low = this.mockParams[addrP]; // 低 16 位寄存器值
-	
-			// 是否需要交换高低位的值
-			if (swap) {
-				[high, low] = [low, high];
-			}
-	
-			// 创建 4 字节缓冲区，将寄存器值按大端序写入
-			let buffer = Buffer.alloc(4);
-			buffer.writeUInt16BE(high, 0); // 高位寄存器
-			buffer.writeUInt16BE(low, 2); // 低位寄存器
-	
-			// 从缓冲区读取浮点数
-			let floatValue = buffer.readFloatBE(0);
-			return floatValue;
+	/**
+ * 将 IEEE 754 单精度浮点数 转化为 float型
+ * @param {number} addr 模拟寄存器中的地址
+ * @param {number} swap 是否需要交换高低位
+ * @returns
+ */
+	IEEE2float(addr, swap = true) {
+		let addrP;
+		let match = addr.match(/\d+/);
+		if (match) {
+			let num = parseInt(match[0], 10);
+			addrP = addr.replace(num, num + 1);
 		}
+		let high = this.mockParams[addr]; // 高 16 位寄存器值
+		let low = this.mockParams[addrP]; // 低 16 位寄存器值
+
+		// 是否需要交换高低位的值
+		if (swap) {
+			[high, low] = [low, high];
+		}
+
+		// 创建 4 字节缓冲区，将寄存器值按大端序写入
+		let buffer = Buffer.alloc(4);
+		buffer.writeUInt16BE(high, 0); // 高位寄存器
+		buffer.writeUInt16BE(low, 2); // 低位寄存器
+
+		// 从缓冲区读取浮点数
+		let floatValue = buffer.readFloatBE(0);
+		return floatValue;
+	}
+
+	/**
+	 * modbus服务器赋值
+	 * @param name 参数key
+	 * @param value 参数值
+	 */
+	setValueModbus(name, value) {
+		let address = this.configParams[name].addr
+		switch (this.configParams[name].type) {
+			case 'short': this.mockParams[address] = parseInt(value); break;
+			case 'float':
+				let [high, low] = this.float2IEEE(Number(value), this.byteOrder);
+				this.mockParams[address] = high;
+				this.mockParams[(parseInt(address) + 1).toString()] = low;
+				break;
+		}
+	}
+
+	/**
+	 * modbus服务器取值
+	 * @param name 参数key
+	 * @returns value 参数值
+	 */
+	getValueModbus(name) {
+		let address = this.configParams[name].addr
+		switch (this.configParams[name].type) {
+			case 'short': return this.mockParams[address];
+			case 'float': return this.IEEE2float(address, this.byteOrder)
+		}
+	}
 }
