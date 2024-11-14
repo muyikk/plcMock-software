@@ -40,6 +40,7 @@ export class Utiles {
       port: format1.port.toString(), // 转换为字符串
       structure: format1?.structure,
       byteOrder: format1?.byteOrder,
+      autoPem: format1?.autoPem,
       params: {},
       hearts: {},
       listens: {},
@@ -109,6 +110,7 @@ export class Utiles {
       port: Number(format2.port), // 转换为数字
       structure: format2?.structure,
       byteOrder: format2?.byteOrder,
+      autoPem: format2?.autoPem,
       mockParams: [],
       hearts: [],
       listens: [],

@@ -240,6 +240,8 @@ class Service {
 		ipcMain.on("startOPCUA", async (event, messageString) => {
 			try {
 				const config = this.utiles.cfgFormat2serFormat(JSON.parse(messageString))
+				// console.log(config.autoPem)
+				// console.log(messageString)
 				this.OPCUAServer = new MockOPCUA(config)
 				await this.OPCUAServer.initServer()
 				event.reply("startOPCUA_response", { success: true });

@@ -9,6 +9,7 @@ export class MockOPCUA {
 	server: OPCUAServer; // 服务器
 	port; // 端口
 	structure; // 结构体名称
+	autoPem; // 是否自动生成凭证
 	mockParams; // 模拟变量
 	listenList; // 监听缓存值
 	listens; // 监听设置
@@ -18,6 +19,7 @@ export class MockOPCUA {
 	constructor(config) {
 		this.port = Number(config.port);
 		this.structure = config.structure;
+		this.autoPem = config.autoPem;
 		this.mockParams = config.params;
 		this.listenList = this.getListenList(config.listens);
 		this.listens = config.listens;
@@ -31,12 +33,19 @@ export class MockOPCUA {
 	async initServer() {
 		return new Promise(async (resolve, reject) => {
 			try {
-				this.server = new OPCUAServer({
-					port: this.port,
-					resourcePath: "/mockPLC",
-					certificateFile: "./certificate.pem",
-					privateKeyFile: "./privateKey.pem",
-				});
+				if (this.autoPem) {
+					this.server = new OPCUAServer({
+						port: this.port,
+						resourcePath: "/mockPLC",
+					});
+				} else {
+					this.server = new OPCUAServer({
+						port: this.port,
+						resourcePath: "/mockPLC",
+						certificateFile: "./certificate.pem",
+						privateKeyFile: "./privateKey.pem",
+					});
+				}
 				await this.server.initialize();
 
 				// 开辟地址空间

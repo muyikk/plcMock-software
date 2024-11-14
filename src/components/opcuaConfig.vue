@@ -12,7 +12,9 @@
         <div class="input">
           <label class="input-label">结构体:</label>
           <el-input v-model="structure" type="text" placeholder="stCCD" style="width: 200px" />
-          <!-- <el-button @click="initOPCUA" type="primary">初始化</el-button> -->
+          <label class="input-label">凭证文件:</label>
+          <el-switch v-model="autoPem" 
+            active-text="自动" inactive-text="手动"/>
         </div>
       </div>
       <el-divider class="divider" />
@@ -252,6 +254,7 @@ export default {
       ip: "127.0.0.1",
       port: 4334,
       structure: "stCCD",
+      autoPem: true,
       // 参数列表
       addParams: [
         {
@@ -320,7 +323,7 @@ export default {
     },
     // 删除操作
     remove(fromData, index) {
-    console.log(fromData,index)
+      console.log(fromData, index)
       if (fromData.length <= 1) {
         return;
       }
@@ -349,6 +352,7 @@ export default {
           ip: this.ip,
           port: this.port,
           structure: this.structure,
+          autoPem: true,
           mockParams: this.addParams,
           hearts: this.hearts,
           listens: this.listens,
@@ -368,6 +372,7 @@ export default {
           name: this.name,
           ip: this.ip,
           port: this.port,
+          autoPem: this.autoPem,
           structure: this.structure,
           mockParams: this.addParams,
           hearts: this.hearts,
@@ -494,7 +499,7 @@ export default {
     });
     window.ipcRenderer.onLoadOPCUAResponse((response) => {
       let data = JSON.parse(response?.data)
-      if(response.success && data.name != 'opcua') {
+      if (response.success && data.name != 'opcua') {
         ElNotification({
           title: '错误',
           message: '该配置不是opcua配置',
@@ -506,6 +511,7 @@ export default {
         this.ip = data.ip
         this.port = data.port
         this.structure = data.structure
+        this.autoPem = true
         this.addParams = data.mockParams
         this.hearts = data.hearts
         this.listens = data.listens

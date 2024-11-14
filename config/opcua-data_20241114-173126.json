@@ -3,6 +3,7 @@
   "ip": "127.0.0.1",
   "port": 4334,
   "structure": "stCCD",
+  "autoPem": true,
   "mockParams": [
     {
       "param": "iCCDHeart",
