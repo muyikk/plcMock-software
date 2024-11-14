@@ -248,7 +248,7 @@ export default {
   },
   data() {
     return {
-      name: "modbus",
+      name: "opcua",
       ip: "127.0.0.1",
       port: 4334,
       structure: "stCCD",

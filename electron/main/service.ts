@@ -4,6 +4,7 @@ import { Utiles } from "./utiles";
 import { app, ipcMain } from "electron";
 import fs from "fs";
 import path from "path";
+import { dayjs } from "element-plus";
 
 class Service {
 	win: any;
@@ -41,7 +42,7 @@ class Service {
 				console.log("Received Modbus message:", message);
 
 				// 定义要写入的文件路径
-				const filePath = this.utiles.getConfigPath("Modbus-data");
+				const filePath = this.utiles.getConfigPath(`Modbus-data_${dayjs().format(`YYYYMMDD-HHmmss`)}`);
 
 				// 将消息对象写入文件
 				fs.writeFile(filePath, JSON.stringify(message, null, 2), (err) => {
@@ -92,6 +93,7 @@ class Service {
 				// console.log(messageString)
 				const config = this.utiles.cfgFormat2serFormat(JSON.parse(messageString))
 				config.listens = JSON.parse(messageString).listens;
+				if(config.name != 'modbus') throw Error('该数据不是modbus服务器！')
 				console.log(config)
 				this.ModbusServer = new MockModbus(config)
 				// const jsonObject = JSON.parse(data);
@@ -188,7 +190,7 @@ class Service {
 				console.log("Received OPCUA message:", message);
 
 				// 定义要写入的文件路径
-				const filePath = this.utiles.getConfigPath("opcua-data");
+				const filePath = this.utiles.getConfigPath(`opcua-data_${dayjs().format(`YYYYMMDD-HHmmss`)}`);
 
 				// 将消息对象写入文件
 				fs.writeFile(filePath, JSON.stringify(message, null, 2), (err) => {
@@ -235,11 +237,11 @@ class Service {
 	 * 启动OPCUA服务
 	 */
 	startOPCUA() {
-		ipcMain.on("startOPCUA", (event, messageString) => {
+		ipcMain.on("startOPCUA", async (event, messageString) => {
 			try {
 				const config = this.utiles.cfgFormat2serFormat(JSON.parse(messageString))
 				this.OPCUAServer = new MockOPCUA(config)
-				// const jsonObject = JSON.parse(data);
+				await this.OPCUAServer.initServer()
 				event.reply("startOPCUA_response", { success: true });
 			} catch (error) {
 				console.error("Failed to read file:", error);

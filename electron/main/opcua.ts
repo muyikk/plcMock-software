@@ -1,8 +1,8 @@
-import { 	
+import {
 	OPCUAServer,
 	Variant,
 	DataType,
-	StatusCodes 
+	StatusCodes
 } from "node-opcua";
 
 export class MockOPCUA {
@@ -24,47 +24,53 @@ export class MockOPCUA {
 		this.heartBeats = config.hearts;
 		this.increaseList = config.increase;
 		this.decreaseList = config.decrease;
-		this.initServer();
 	}
 	/**
 	 * 创建服务器
 	 */
 	async initServer() {
-		// 初始化服务
-		this.server = new OPCUAServer({
-			port: this.port,
-			resourcePath: "/mockPLC",
-			certificateFile: "./certificate.pem",
-			privateKeyFile: "./privateKey.pem",
-		});
-		await this.server.initialize();
+		return new Promise(async (resolve, reject) => {
+			try {
+				this.server = new OPCUAServer({
+					port: this.port,
+					resourcePath: "/mockPLC",
+					certificateFile: "./certificate.pem",
+					privateKeyFile: "./privateKey.pem",
+				});
+				await this.server.initialize();
 
-		// 开辟地址空间
-		const addressSpace = this.server.engine.addressSpace;
-		// 在地址空间中开辟namespace
-		const namespace = addressSpace.getOwnNamespace();
+				// 开辟地址空间
+				const addressSpace = this.server.engine.addressSpace;
+				// 在地址空间中开辟namespace
+				const namespace = addressSpace.getOwnNamespace();
 
-		// 添加对象（用于储存变量，如：stCCD）,挂在地址空间里的Objects目录下
-		const device = namespace.addObject({
-			organizedBy: addressSpace.rootFolder.objects,
-			browseName: this.structure,
-		});
+				// 添加对象（用于储存变量，如：stCCD）,挂在地址空间里的Objects目录下
+				const device = namespace.addObject({
+					organizedBy: addressSpace.rootFolder.objects,
+					browseName: this.structure,
+				});
 
-		// 初始化变量
-		for (const key in this.mockParams) {
-			this.initParams(namespace, device, key);
-		}
+				// 初始化变量
+				for (const key in this.mockParams) {
+					this.initParams(namespace, device, key);
+				}
 
-		// 启动服务
-		this.server.start(function () {
-			console.log("Server is now listening ... ");
-		});
-		console.log(`url: opc.tcp://127.0.0.1:${this.port}`);
+				// 启动服务
+				this.server.start(function () {
+					console.log("Server is now listening ... ");
+				});
+				console.log(`url: opc.tcp://127.0.0.1:${this.port}`);
 
-		// 启动心跳
-		this.heartBeat();
-		this.increase()
-		this.decrease()
+				// 启动心跳
+				this.heartBeat();
+				this.increase()
+				this.decrease()
+				resolve(true)
+			} catch (err) {
+				reject(err)
+			}
+		})
+
 	}
 
 	destroy() {
@@ -84,9 +90,9 @@ export class MockOPCUA {
 			dataType: this.mockParams[param].type,
 			value: {
 				get: () => {
-          // 参数是否在监听列表里
+					// 参数是否在监听列表里
 					if (this.listens[param]) {
-            // 参数是否发生改变
+						// 参数是否发生改变
 						if (this.listenList[param] != this.mockParams[param].value)
 							this.listen();
 					}
@@ -127,11 +133,11 @@ export class MockOPCUA {
 		}
 	}
 
-  /**
-   * 初始化监听缓存值
-   * @param {Object} listens 监听规则对象
-   * @returns 
-   */
+	/**
+	 * 初始化监听缓存值
+	 * @param {Object} listens 监听规则对象
+	 * @returns 
+	 */
 	getListenList(listens) {
 		let listenList = {};
 		for (let listen in listens) {
@@ -145,10 +151,10 @@ export class MockOPCUA {
 	 */
 	heartBeat() {
 		for (let heart in this.heartBeats) {
-      if(!this.mockParams[heart]) {
-        console.log(`心跳参数 ${heart} 未初始化`)
-        continue
-      }
+			if (!this.mockParams[heart]) {
+				console.log(`心跳参数 ${heart} 未初始化`)
+				continue
+			}
 			setInterval(() => {
 				if (this.mockParams[heart].value == this.heartBeats[heart].data1)
 					this.mockParams[heart].value = this.heartBeats[heart].data2;
@@ -157,47 +163,47 @@ export class MockOPCUA {
 		}
 	}
 
-  /**
-   * 监听值发生变化，触发更改其他值
-   */
+	/**
+	 * 监听值发生变化，触发更改其他值
+	 */
 	listen() {
-    // 寻找监听规则列表
+		// 寻找监听规则列表
 		for (let listen in this.listens) {
 			this.listens[listen].forEach((param) => {
-        // 如果改变的值 == 规则列表中的值
+				// 如果改变的值 == 规则列表中的值
 				if (param.data == this.mockParams[listen].value) {
-          if(!this.mockParams[param.change.param]) {
-            console.log(`监听 ${listen} = ${this.mockParams[listen].value} 时，改变 ${param.change.param} 的变量未初始化`)
-            return
-          }
-          // 触发更改其他值
+					if (!this.mockParams[param.change.param]) {
+						console.log(`监听 ${listen} = ${this.mockParams[listen].value} 时，改变 ${param.change.param} 的变量未初始化`)
+						return
+					}
+					// 触发更改其他值
 					this.mockParams[param.change.param].value = param.change.value;
-          // 更新监听缓存值
+					// 更新监听缓存值
 					this.listenList[listen] = this.mockParams[listen].value;
 				}
 			});
 		}
 	}
 
-  /**
-   * 递增变量初始化
-   */
-  increase() {
-    for(let param in this.increaseList) {
-      setInterval(() => {
-        this.mockParams[param].value += this.increaseList[param].tolerance
-      }, this.increaseList[param].interval);
-    }
-  }
-  /**
-   * 递减变量初始化
-   */
-  decrease() {
-    for(let param in this.decreaseList) {
-      setInterval(() => {
-        this.mockParams[param].value -= this.decreaseList[param].tolerance
-      }, this.decreaseList[param].interval);
-    }
-  }
+	/**
+	 * 递增变量初始化
+	 */
+	increase() {
+		for (let param in this.increaseList) {
+			setInterval(() => {
+				this.mockParams[param].value += this.increaseList[param].tolerance
+			}, this.increaseList[param].interval);
+		}
+	}
+	/**
+	 * 递减变量初始化
+	 */
+	decrease() {
+		for (let param in this.decreaseList) {
+			setInterval(() => {
+				this.mockParams[param].value -= this.decreaseList[param].tolerance
+			}, this.decreaseList[param].interval);
+		}
+	}
 }
 
