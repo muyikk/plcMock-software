@@ -510,8 +510,15 @@ export default {
       }
     });
     window.ipcRenderer.onLoadModbusResponse((response) => {
-      if (response.success) {
-        let data = JSON.parse(response.data)
+      let data = JSON.parse(response?.data)
+      if(response.success && data.name != 'modbus') {
+        ElNotification({
+          title: '错误',
+          message: '该配置不是modbus配置',
+          type: 'error'
+        });
+        // throw Error('该配置不是modbus配置')
+      } else if (response.success) {
         this.ip = data.ip
         this.port = data.port
         this.unitID = data.unitID

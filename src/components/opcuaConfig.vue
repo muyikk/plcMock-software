@@ -493,7 +493,15 @@ export default {
       }
     });
     window.ipcRenderer.onLoadOPCUAResponse((response) => {
-      if (response.success) {
+      let data = JSON.parse(response?.data)
+      if(response.success && data.name != 'opcua') {
+        ElNotification({
+          title: '错误',
+          message: '该配置不是opcua配置',
+          type: 'error'
+        });
+        // throw Error('该配置不是modbus配置')
+      } else if (response.success) {
         let data = JSON.parse(response.data)
         this.ip = data.ip
         this.port = data.port
