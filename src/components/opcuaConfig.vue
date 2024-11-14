@@ -13,8 +13,15 @@
           <label class="input-label">结构体:</label>
           <el-input v-model="structure" type="text" placeholder="stCCD" style="width: 200px" />
           <label class="input-label">凭证文件:</label>
-          <el-switch v-model="autoPem" 
-            active-text="自动" inactive-text="手动"/>
+          <el-switch v-model="autoPem" active-text="自动" inactive-text="手动" />
+          <el-popover placement="top-start" title="凭证文件说明" :width="500" trigger="hover" content="默认使用自动凭证文件，如果报错Failed to read file: Error: ENOENT: no such file or directory,可以在cmd执行以下代码重新生成自签名证书和私钥，并且切到手动凭证文件```
+openssl req -x509 -newkey rsa:2048 -keyout privateKey.pem -out certificate.pem -days 365 -nodes```，或查看README">
+            <template #reference>
+              <el-icon color="gray">
+                <QuestionFilled />
+              </el-icon>
+            </template>
+          </el-popover>
         </div>
       </div>
       <el-divider class="divider" />
