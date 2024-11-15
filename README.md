@@ -1,3 +1,4 @@
+![image](https://github.com/muyikk/plcMock-software/blob/main/public/icon.png)
 # kl-mockplc
 模拟plc服务器的程序，可以自定义plc的结构体、变量。<br>兼容`opcua`、`modbus`、`三菱MC(待实现)`、`kl-TCP(待实现)`协议<br>并且实现设置变量的 `心跳`、`监听值并作出反馈`、`自增`、`自减`功能<br>启动服务后能够实时监控和修改所有变量的值
 
