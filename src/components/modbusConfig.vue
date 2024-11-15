@@ -227,9 +227,13 @@
       </div>
     </div>
   </div>
-  <el-button class="viewParams" @click="drawer = true" type="primary" circle><el-icon>
-      <View />
-    </el-icon></el-button>
+  <el-tooltip placement="left-start" effect="light" content="实时监控">
+    <el-button class="viewParams" @click="drawer = true" type="primary" circle>
+      <el-icon>
+        <View />
+      </el-icon>
+    </el-button>
+  </el-tooltip>
 
   <el-drawer v-model="drawer" direction="btt" size="80%" title="I am the title" :with-header="false">
     <viewListModbus :params="pollingParams" @update-value="update" />
