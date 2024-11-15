@@ -111,7 +111,7 @@ plc模拟程序v1.0.0
 
 ```
 ### Question
-#### 1、如果缺少凭证文件`privateKey.pem`和`certificate.pem`，会提示报错<br>可以选择执行以下代码重新生成自签名证书和私钥
+#### 1、如果缺少凭证文件`privateKey.pem`和`certificate.pem`，会提示报错<br>可以选择执行重新生成自签名证书和私钥<br>在软件运行根目录执行以下代码
 ```bash
 openssl req -x509 -newkey rsa:2048 -keyout privateKey.pem -out certificate.pem -days 365 -nodes
 ```
