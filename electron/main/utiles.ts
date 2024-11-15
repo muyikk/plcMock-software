@@ -50,6 +50,7 @@ export class Utiles {
 
     // 转换 mockParams
     format1.mockParams.forEach(param => {
+      if(param.type != '')
       format2.params[param.param] = {
         type: param.type,
         addr: param?.addr,
@@ -59,6 +60,7 @@ export class Utiles {
 
     // 转换 hearts
     format1.hearts.forEach(heart => {
+      if(heart.param != '')
       format2.hearts[heart.param] = {
         data1: Number(heart.data1),
         data2: Number(heart.data2),
@@ -69,21 +71,24 @@ export class Utiles {
     // 转换 listens
     for (let i in format1.listens) {
       let listen = format1.listens[i]
-      if (!(listen.param in format2.listens)) {
-        format2.listens[listen.param] = []
-      }
-      format2.listens[listen.param].push({
-        data: Number(listen.data),
-        change: {
-          param: listen.changeParam,
-          value: Number(listen.changeValue),
-        },
-      });
+      if(listen.param != ''){
 
+        if (!(listen.param in format2.listens)) {
+          format2.listens[listen.param] = []
+        }
+        format2.listens[listen.param].push({
+          data: Number(listen.data),
+          change: {
+            param: listen.changeParam,
+            value: Number(listen.changeValue),
+          },
+        });
+      }
     }
 
     // 转换 increase
     format1.increase.forEach(increase => {
+      if(increase.param != '')
       format2.increase[increase.param] = {
         tolerance: Number(increase.tolerance),
         interval: Number(increase.interval),
@@ -92,6 +97,7 @@ export class Utiles {
 
     // 转换 decrease
     format1.decrease.forEach(decrease => {
+      if(decrease.param != '')
       format2.decrease[decrease.param] = {
         tolerance: Number(decrease.tolerance),
         interval: Number(decrease.interval),

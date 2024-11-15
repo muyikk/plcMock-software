@@ -82,13 +82,14 @@ export class MockModbus {
 	 * 初始化监听变量
 	 */
 	initListens() {
-		setInterval(() => {
-			for(let listen of this.listens) {
+		if(Object.keys(this.listens).length == 0) return
+		for(let listen of this.listens) {
+			setInterval(() => {
 				if (this.getValueModbus(listen.param) == listen.data){
 					this.setValueModbus(listen.changeParam, listen.changeValue)
 				} 
-			}
-		}, 200);
+			}, 200);
+		}
 	}
 	/**
 	 * 创建服务器

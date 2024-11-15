@@ -92,9 +92,10 @@ class Service {
 			try {
 				// console.log(messageString)
 				const config = this.utiles.cfgFormat2serFormat(JSON.parse(messageString))
-				config.listens = JSON.parse(messageString).listens;
-				if(config.name != 'modbus') throw Error('该数据不是modbus服务器！')
 				console.log(config)
+				if(Object.keys(config.listens).length != 0)
+				 config.listens = JSON.parse(messageString).listens;
+				if(config.name != 'modbus') throw Error('该数据不是modbus服务器！')
 				this.ModbusServer = new MockModbus(config)
 				// const jsonObject = JSON.parse(data);
 				event.reply("startModbus_response", { success: true });
@@ -240,8 +241,8 @@ class Service {
 		ipcMain.on("startOPCUA", async (event, messageString) => {
 			try {
 				const config = this.utiles.cfgFormat2serFormat(JSON.parse(messageString))
-				// console.log(config.autoPem)
 				// console.log(messageString)
+				console.log(config)
 				this.OPCUAServer = new MockOPCUA(config)
 				await this.OPCUAServer.initServer()
 				event.reply("startOPCUA_response", { success: true });

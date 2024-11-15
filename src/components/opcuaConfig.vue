@@ -14,7 +14,7 @@
           <el-input v-model="structure" type="text" placeholder="stCCD" style="width: 200px" />
           <label class="input-label">凭证文件:</label>
           <el-switch v-model="autoPem" active-text="自动" inactive-text="手动" />
-          <el-popover placement="top-start" title="凭证文件说明" :width="500" trigger="hover" content="默认使用自动凭证文件，如果报错Failed to read file: Error: ENOENT: no such file or directory,可以在cmd执行以下代码重新生成自签名证书和私钥，并且切到手动凭证文件，详细问题查看README```
+          <el-popover placement="top-start" title="凭证文件说明" :width="500" trigger="hover" content="默认使用自动凭证文件，用于启动opcua服务器。  如果报错Failed to read file: Error: ENOENT: no such file or directory,可以在cmd执行以下代码重新生成自签名证书和私钥，并且切到手动凭证文件，详细问题查看README```
 openssl req -x509 -newkey rsa:2048 -keyout privateKey.pem -out certificate.pem -days 365 -nodes```">
             <template #reference>
               <el-icon color="gray">
@@ -39,7 +39,10 @@ openssl req -x509 -newkey rsa:2048 -keyout privateKey.pem -out certificate.pem -
             <template v-slot="scope">
               <el-select v-model="scope.row.type" placeholder="请选择类型">
                 <el-option label="Int16" value="Int16"></el-option>
+                <el-option label="Int32" value="Int32"></el-option>
+                <el-option label="Int64" value="Int64"></el-option>
                 <el-option label="Double" value="Double"></el-option>
+                <el-option label="Float" value="Float"></el-option>
               </el-select>
             </template>
           </el-table-column>
@@ -224,9 +227,13 @@ openssl req -x509 -newkey rsa:2048 -keyout privateKey.pem -out certificate.pem -
       </div>
     </div>
   </div>
-  <el-button class="viewParams" @click="drawer = true" type="primary" circle><el-icon>
-      <View />
-    </el-icon></el-button>
+  <el-tooltip placement="left-start" effect="light" content="实时监控">
+    <el-button class="viewParams" @click="drawer = true" type="primary" circle>
+      <el-icon>
+        <View />
+      </el-icon>
+    </el-button>
+  </el-tooltip>
 
   <el-drawer v-model="drawer" direction="btt" size="80%" title="I am the title" :with-header="false">
     <viewListOPCUA :params="pollingParams" @update-value="update" />
@@ -239,8 +246,12 @@ openssl req -x509 -newkey rsa:2048 -keyout privateKey.pem -out certificate.pem -
         <el-button size="small" type="info" round @click="load">导入参数</el-button>
       </div>
       <div>
-        <el-button v-if="!isStart" size="small" type="primary" round @click="start"><el-icon><SwitchButton /></el-icon>启动服务</el-button>
-        <el-button v-if="isStart" size="small" type="danger" round @click="close"><el-icon><SwitchButton /></el-icon>断开服务</el-button>
+        <el-button v-if="!isStart" size="small" type="primary" round @click="start"><el-icon>
+            <SwitchButton />
+          </el-icon>启动服务</el-button>
+        <el-button v-if="isStart" size="small" type="danger" round @click="close"><el-icon>
+            <SwitchButton />
+          </el-icon>断开服务</el-button>
         <!-- <Edit /> -->
       </div>
     </div>
@@ -627,5 +638,4 @@ export default {
   padding: 10px;
   /* 顶部边框 */
   z-index: 1000;
-}
-</style>
+}</style>

@@ -110,7 +110,7 @@ export default {
       // 发送更新的值到父组件
       console.log({ param: row.param, newValue: this.newValues[row.param] })
       this.$emit('update-value', { param: row.param, newValue: this.newValues[row.param] });
-      row.newValue = '';
+      this.newValues[row.param] = '';
 
     }
   },
