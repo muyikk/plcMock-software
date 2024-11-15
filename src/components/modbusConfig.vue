@@ -242,8 +242,8 @@
         <el-button size="small" type="info" round @click="load">导入参数</el-button>
       </div>
       <div>
-        <el-button :loading="loading.start" size="small" type="primary" round @click="start">启动服务</el-button>
-        <el-button size="small" type="danger" round @click="close">断开服务</el-button>
+        <el-button v-if="!isStart" size="small" type="primary" round @click="start"><el-icon><SwitchButton /></el-icon>启动服务</el-button>
+        <el-button v-if="isStart" size="small" type="danger" round @click="close"><el-icon><SwitchButton /></el-icon>断开服务</el-button>
         <!-- <Edit /> -->
       </div>
     </div>
@@ -314,6 +314,7 @@ export default {
           interval: ""
         }
       ],
+      isStart: false,
       loading: {
         save: false,
         load: false,
@@ -379,6 +380,7 @@ export default {
       console.log(filePaths)
     },
     start() {
+      this.isStart = true
       window.ipcRenderer.startModbus(
         JSON.stringify({
           name: this.name,
@@ -396,6 +398,7 @@ export default {
     },
     close() {
       console.log(`vue closeModbus`)
+      this.isStart = false
       window.ipcRenderer.closeModbus()
     },
     view() {

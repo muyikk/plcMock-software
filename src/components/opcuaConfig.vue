@@ -14,8 +14,8 @@
           <el-input v-model="structure" type="text" placeholder="stCCD" style="width: 200px" />
           <label class="input-label">凭证文件:</label>
           <el-switch v-model="autoPem" active-text="自动" inactive-text="手动" />
-          <el-popover placement="top-start" title="凭证文件说明" :width="500" trigger="hover" content="默认使用自动凭证文件，如果报错Failed to read file: Error: ENOENT: no such file or directory,可以在cmd执行以下代码重新生成自签名证书和私钥，并且切到手动凭证文件```
-openssl req -x509 -newkey rsa:2048 -keyout privateKey.pem -out certificate.pem -days 365 -nodes```，或查看README">
+          <el-popover placement="top-start" title="凭证文件说明" :width="500" trigger="hover" content="默认使用自动凭证文件，如果报错Failed to read file: Error: ENOENT: no such file or directory,可以在cmd执行以下代码重新生成自签名证书和私钥，并且切到手动凭证文件，详细问题查看README```
+openssl req -x509 -newkey rsa:2048 -keyout privateKey.pem -out certificate.pem -days 365 -nodes```">
             <template #reference>
               <el-icon color="gray">
                 <QuestionFilled />
@@ -239,8 +239,8 @@ openssl req -x509 -newkey rsa:2048 -keyout privateKey.pem -out certificate.pem -
         <el-button size="small" type="info" round @click="load">导入参数</el-button>
       </div>
       <div>
-        <el-button :loading="loading.start" size="small" type="primary" round @click="start">启动服务</el-button>
-        <el-button size="small" type="danger" round @click="close">断开服务</el-button>
+        <el-button v-if="!isStart" size="small" type="primary" round @click="start"><el-icon><SwitchButton /></el-icon>启动服务</el-button>
+        <el-button v-if="isStart" size="small" type="danger" round @click="close"><el-icon><SwitchButton /></el-icon>断开服务</el-button>
         <!-- <Edit /> -->
       </div>
     </div>
@@ -309,6 +309,7 @@ export default {
           interval: ""
         }
       ],
+      isStart: false,
       loading: {
         save: false,
         load: false,
@@ -374,6 +375,7 @@ export default {
       console.log(filePaths)
     },
     start() {
+      this.isStart = true
       window.ipcRenderer.startOPCUA(
         JSON.stringify({
           name: this.name,
@@ -391,6 +393,7 @@ export default {
     },
     close() {
       console.log(`vue closeOPCUA`)
+      this.isStart = false
       window.ipcRenderer.closeOPCUA()
     },
     view() {
@@ -439,7 +442,7 @@ export default {
 
         this.polling()
         this.drawer = true
-        this.loading.start = true
+        // this.loading.start = true
       } else {
         console.error('Error:', response.error);
         ElNotification({
@@ -475,7 +478,7 @@ export default {
           message: 'OPCUA服务已关闭',
           type: 'warning'
         });
-        this.loading.start = false
+        // this.loading.start = false
       } else {
         console.error('Error:', response.error);
         ElNotification({
@@ -487,7 +490,7 @@ export default {
       }
     });
     window.ipcRenderer.onSaveOPCUAResponse((response) => {
-      this.loading.save = false
+      // this.loading.save = false
       if (response.success) {
         console.log('config saved successfully!');
         ElNotification({

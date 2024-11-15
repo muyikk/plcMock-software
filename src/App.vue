@@ -1,32 +1,29 @@
 <script setup>
 import { useRouter } from "vue-router";
-import { ref } from 'vue';
-
+import { ref, onMounted } from 'vue';
+// debugger
+const activeRoute = ref("/opcua"); // 使用 ref 保存当前路径
 const router = useRouter();
-const activeRoute = ref("modbus"); // 使用 ref 保存当前路径
-const routeMap = {
-  '1': '/opcua',
-  '2': '/modbus',
-  '3': '/MC',
-};
 
 const handleTabClick = (index) => {
-  const route = routeMap[index];
-  if (route) {
-    router.push(route); // 路由跳转
-    activeRoute.value = route; // 更新当前活动路由
-  }
+  activeRoute.value = index;
+  router.push(index);
 };
+
+onMounted(() => {
+  // 设置 activeRoute 为当前路由,避免重新渲染造成活动状态重置
+  activeRoute.value = router.currentRoute.value.path;
+})
 </script>
 
 <template>
   <div id="app">
     <div class="tabs">
       <el-menu :default-active="activeRoute" mode="horizontal" @select="handleTabClick" background-color="#545c64"
-        text-color="#fff" active-text-color="#ffd04b">
-        <el-menu-item index="1">opcua</el-menu-item>
-        <el-menu-item index="2">modbus</el-menu-item>
-        <el-menu-item index="3">Mitsubishi MC</el-menu-item>
+        text-color="#fff">
+        <el-menu-item index="/opcua" :exact="true">opcua</el-menu-item>
+        <el-menu-item index="/modbus" :exact="true">modbus</el-menu-item>
+        <el-menu-item index="/MC" :exact="true">Mitsubishi MC</el-menu-item>
       </el-menu>
     </div>
     <div class="content">
@@ -54,8 +51,4 @@ const handleTabClick = (index) => {
   padding: 0px;
 }
 
-.content {
-  /* margin-top: 60px; 留出空间以防内容被标签遮挡 */
-  /* margin-bottom: 60px; */
-}
 </style>
