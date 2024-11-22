@@ -20,7 +20,7 @@ onMounted(() => {
   <div id="app">
     <el-container style="height: 100%; width: 100%;">
       <el-aside class="aside" width = "200px">
-        <el-image src="src\assets\icon.png" style="width: 100px; height: 100px; " :fit="fit" />
+        <el-image src="icon.png" style="width: 100px; height: 100px; " :fit="fit" />
         <div class="tabs">
           <el-menu :default-active="activeRoute" mode="vertical" @select="handleTabClick" background-color="#324057"
             text-color="#fff">
