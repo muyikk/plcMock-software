@@ -1,19 +1,20 @@
 import { ServerTCP } from "modbus-serial";
+import { Utiles } from "./utiles";
 
 export class MockModbus {
-	server
-	port
-	unitID
-	mockParams
-	configParams
-	byteOrder
-	test
-	listenList; // 监听缓存值
-	listens; // 监听设置
-	heartBeats; // 心跳设置
-	increaseList; // 递增设置
-	decreaseList; // 递减设置
+	utiles: Utiles
+	server: ServerTCP;
+	port: number;
+	unitID: number;
+	mockParams: object;
+	configParams: object;
+	byteOrder: boolean;
+	listens: any; // 监听设置
+	heartBeats: object; // 心跳设置
+	increaseList: object; // 递增设置
+	decreaseList: object; // 递减设置
 	constructor(config) {
+		this.utiles = new Utiles()
 		this.port = config.port;
 		this.unitID = config.unitID;
 		this.byteOrder = config.byteOrder == 'CDAB' ? true : false;
@@ -106,7 +107,6 @@ export class MockModbus {
 				unitID: this.unitID, // Modbus 单元标识符，默认设置为1
 			}
 		);
-		// console.log(this.listenList)
 		this.initHeartBeats()
 		this.initIncreases()
 		this.initDecreases()
@@ -331,5 +331,17 @@ export class MockModbus {
 			case 'short': return this.mockParams[address];
 			case 'float': return this.IEEE2float(address, this.byteOrder)
 		}
+	}
+
+	getRegister(addr, type) {
+		const Array = []
+    if(type == 'short'){
+      Array.push({address: addr, value: this.mockParams[addr]})
+    } else if(type == 'float') {
+      let addr1 = (Number(addr)+1).toString()
+      Array.push({address: addr, value: this.mockParams[addr]})
+      Array.push({address: addr1, value: this.mockParams[addr1]})
+    }
+    return Array
 	}
 }

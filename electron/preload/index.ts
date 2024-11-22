@@ -41,8 +41,25 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
   
   pollingModbus: (message) => ipcRenderer.send('pollingModbus', message),
   onPollingModbusResponse: (callback) => ipcRenderer.on('pollingModbus_response', (event, arg) => callback(arg)),
-  
 
+  saveMC: (message) => ipcRenderer.send('saveMC', message),
+  onSaveMCResponse: (callback) => ipcRenderer.on('saveMC_response', (event, arg) => callback(arg)),
+
+  loadMC: (message) => ipcRenderer.send('loadMC', message),
+  onLoadMCResponse: (callback) => ipcRenderer.on('loadMC_response', (event, arg) => callback(arg)),
+
+  startMC: (message) => ipcRenderer.send('startMC', message),
+  onStartMCResponse: (callback) => ipcRenderer.on('startMC_response', (event, arg) => callback(arg)),
+
+  closeMC: (message) => ipcRenderer.send('closeMC', message),
+  onCloseMCResponse: (callback) => ipcRenderer.on('closeMC_response', (event, arg) => callback(arg)),
+  
+  updateMC: (message) => ipcRenderer.send('updateMC', message),
+  onUpdateMCResponse: (callback) => ipcRenderer.on('updateMC_response', (event, arg) => callback(arg)),
+  
+  pollingMC: (message) => ipcRenderer.send('pollingMC', message),
+  onPollingMCResponse: (callback) => ipcRenderer.on('pollingMC_response', (event, arg) => callback(arg)),
+  
   on(...args: Parameters<typeof ipcRenderer.on>) {
     const [channel, listener] = args
     return ipcRenderer.on(channel, (event, ...args) => listener(event, ...args))

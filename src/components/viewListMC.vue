@@ -1,7 +1,6 @@
 <template>
   <!-- {{ localParams }} -->
-  <el-table :data="localParams" row-key="param" :expand-row-keys="expandedRowKeys" @expand-change="handleExpandChange"
-    style="width: 100%">
+  <el-table :data="localParams" style="width: 100%" row-key="param" :expand-row-keys="expandedRowKeys" @expand-change="handleExpandChange">
     <el-table-column prop="param" label="参数名" width="150" align="center">
       <template v-slot="scope">
         <el-input v-model="scope.row.param" disabled></el-input>
@@ -75,7 +74,7 @@ export default {
         } else {
           let newData = this.transformDataToArray(newParams);
           for (let key in newData) {
-            if (this.localParams[key]?.value != newData[key]?.value) {
+            if (this.localParams[key].value != newData[key].value) {
               this.localParams[key].value = newData[key]?.value
               this.localParams[key].address = newData[key]?.address
             }
@@ -93,7 +92,7 @@ export default {
     transformDataToArray(params) {
       // 将对象转换为数组格式，以便在表格中显示
       return Object.keys(params).map(key => ({
-        param: key,
+        param: params[key].param,
         type: params[key].type,
         value: params[key].value,
         addr: params[key].addr,
@@ -131,4 +130,5 @@ export default {
 .el-table {
   margin: 20px 0;
 }
+
 </style>

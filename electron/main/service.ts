@@ -1,5 +1,6 @@
 import { MockOPCUA } from "./opcua";
 import { MockModbus } from "./modbus";
+import { MockMC } from "./MC";
 import { Utiles } from "./utiles";
 import { app, ipcMain } from "electron";
 import fs from "fs";
@@ -11,8 +12,10 @@ class Service {
 	utiles: Utiles;
 	OPCUAServer: MockOPCUA;
 	ModbusServer: MockModbus;
+	MCServer: MockMC;
 	polling_intervalOPCUA: any;
 	polling_intervalModbus: any;
+	polling_intervalMC: any;
 	constructor(win) {
 		this.win = win
 		this.utiles = new Utiles()
@@ -30,6 +33,154 @@ class Service {
 		this.closeModbus();
 		this.updateModbus();
 		this.pollingModbus();
+
+		this.saveMC();
+		this.loadMC();
+		this.startMC();
+		this.closeMC();
+		this.updateMC();
+		this.pollingMC();
+	}
+
+
+	/**
+	 * 保存MC服务参数
+	 */
+	saveMC() {
+		ipcMain.on("saveMC", (event, messageString) => {
+			try {
+				const message = JSON.parse(messageString);
+				console.log("Received MC message:", message);
+
+				// 定义要写入的文件路径
+				const filePath = this.utiles.getConfigPath(`MC-data_${dayjs().format(`YYYYMMDD-HHmmss`)}`);
+
+				// 将消息对象写入文件
+				fs.writeFile(filePath, JSON.stringify(message, null, 2), (err) => {
+					if (err) {
+						console.error("Failed to write file:", err);
+						event.reply("saveMC_response", {
+							success: false,
+							error: err.message,
+						});
+					} else {
+						console.log("File written successfully:", filePath);
+						event.reply("saveMC_response", { success: true });
+					}
+				});
+			} catch (error) {
+				console.error("Failed to parse message:", error);
+				event.reply("saveMC_response", {
+					success: false,
+					error: error.message,
+				});
+			}
+		});
+	}
+	/**
+	 * 读取MC服务参数
+	 */
+	loadMC() {
+		ipcMain.on("loadMC", (event, messageString) => {
+			try {
+				const data = fs.readFileSync(messageString[0], 'utf-8');
+				// const jsonObject = JSON.parse(data);
+				event.reply("loadMC_response", { data, success: true });
+			} catch (error) {
+				console.error("Failed to read file:", error);
+				event.reply("loadMC_response", {
+					success: false,
+					error: error.message,
+				});
+			}
+		});
+	}
+	/**
+	 * 启动MC服务
+	 */
+	startMC() {
+		ipcMain.on("startMC", (event, messageString) => {
+			try {
+				// console.log(messageString)
+				// const config = this.utiles.cfgFormat2serFormat(JSON.parse(messageString))
+				const config = JSON.parse(messageString)
+				console.log(config)
+				if(Object.keys(config.listens).length != 0)
+				 config.listens = JSON.parse(messageString).listens;
+				if(config.name != 'MC') throw Error('该数据不是MC服务器！')
+				this.MCServer = new MockMC(config)
+				this.MCServer.init()
+				// const jsonObject = JSON.parse(data);
+				event.reply("startMC_response", { success: true });
+			} catch (error) {
+				console.error("Failed to read file:", error);
+				event.reply("startMC_response", {
+					success: false,
+					error: error.message,
+				});
+			}
+		});
+	}
+	/**
+	 * 关闭MC服务
+	 */
+	closeMC() {
+		ipcMain.on("closeMC", (event, messageString) => {
+			try {
+				this.polling_intervalMC ? clearInterval(this.polling_intervalMC) : null
+				this.MCServer.destory()
+				event.reply("closeMC_response", { success: true });
+			} catch (error) {
+				console.error("Failed to read file:", error);
+				event.reply("closeMC_response", {
+					success: false,
+					error: error.message,
+				});
+			}
+		});
+	}
+	/**
+	 * 更新MC数据
+	 */
+	updateMC() {
+		ipcMain.on("updateMC", (event, { param, newValue }) => {
+			try {
+				console.log(param, newValue, Number(newValue))
+				this.MCServer.setValueMC(param, newValue)
+				event.reply("updateMC_response", { success: true });
+			} catch (error) {
+				console.error("Failed to read file:", error);
+				event.reply("updateMC_response", {
+					success: false,
+					error: error.message,
+				});
+			}
+		});
+	}
+	/**
+	 * 轮询MC数据
+	 */
+	pollingMC() {
+		ipcMain.on("pollingMC", (event, messageString) => {
+			try {
+				this.polling_intervalMC ? clearInterval(this.polling_intervalMC) : null
+				this.polling_intervalMC = setInterval(() => {
+					let params = this.MCServer.configParams
+					let mock = this.MCServer.mockParams
+					for (const key in Object.entries(params)){
+						params[key].value = this.MCServer.getValueMC(params[key].addr, params[key].type)
+						params[key]['address'] = this.MCServer.getRegister(params[key].addr, params[key].type)
+					}
+					this.win.webContents.send("pollingMC_response", { success: true, polling: params });
+				}, 200)
+			} catch (error) {
+				console.error("Failed to read file:", error);
+				event.reply("pollingMC_response", {
+					success: false,
+					error: error.message,
+				});
+			}
+		});
 	}
 
 	/**
@@ -153,8 +304,10 @@ class Service {
 				this.polling_intervalModbus ? clearInterval(this.polling_intervalModbus) : null
 				this.polling_intervalModbus = setInterval(() => {
 					let params = this.ModbusServer.configParams
+					let mock = this.ModbusServer.mockParams
 					for (const [key, param] of Object.entries(params)){
 						params[key].value = this.ModbusServer.getValueModbus(key)
+						params[key]['address'] = this.ModbusServer.getRegister(params[key].addr, params[key].type)
 					}
 					this.win.webContents.send("pollingModbus_response", { success: true, polling: params });
 				}, 200)

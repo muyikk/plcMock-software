@@ -1,0 +1,85 @@
+{
+  "name": "MC",
+  "ip": "127.0.0.1",
+  "port": 4334,
+  "mockParams": [
+    {
+      "param": "iCCDHeart",
+      "addr": "D1119",
+      "type": "short",
+      "value": "1"
+    },
+    {
+      "param": "iState",
+      "addr": "D1120",
+      "type": "short",
+      "value": "1"
+    },
+    {
+      "param": "ichangeParam",
+      "type": "short",
+      "addr": "D1121",
+      "value": "1"
+    },
+    {
+      "param": "rchangeParam",
+      "type": "float",
+      "addr": "D1122",
+      "value": "1.5"
+    },
+    {
+      "param": "inCrease",
+      "type": "short",
+      "addr": "D580",
+      "value": "1"
+    },
+    {
+      "param": "deCrease",
+      "type": "short",
+      "addr": "D7002",
+      "value": "1"
+    }
+  ],
+  "hearts": [
+    {
+      "param": "iCCDHeart",
+      "data1": "0",
+      "data2": "1",
+      "interval": "2000"
+    }
+  ],
+  "listens": [
+    {
+      "param": "iState",
+      "data": "1",
+      "changeParam": "ichangeParam",
+      "changeValue": "2"
+    },
+    {
+      "param": "iState",
+      "data": "0",
+      "changeParam": "rchangeParam",
+      "changeValue": "2.5"
+    },
+    {
+      "param": "ichangeParam",
+      "data": "5",
+      "changeParam": "rchangeParam",
+      "changeValue": "5.5"
+    }
+  ],
+  "increase": [
+    {
+      "param": "inCrease",
+      "tolerance": "1",
+      "interval": "1000"
+    }
+  ],
+  "decrease": [
+    {
+      "param": "deCrease",
+      "tolerance": "1",
+      "interval": "1000"
+    }
+  ]
+}

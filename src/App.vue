@@ -18,37 +18,40 @@ onMounted(() => {
 
 <template>
   <div id="app">
-    <div class="tabs">
-      <el-menu :default-active="activeRoute" mode="horizontal" @select="handleTabClick" background-color="#545c64"
-        text-color="#fff">
-        <el-menu-item index="/opcua" :exact="true">opcua</el-menu-item>
-        <el-menu-item index="/modbus" :exact="true">modbus</el-menu-item>
-        <el-menu-item index="/MC" :exact="true">Mitsubishi MC</el-menu-item>
-      </el-menu>
-    </div>
-    <div class="content">
-      <router-view></router-view>
-    </div>
+    <el-container style="height: 100%; width: 100%;">
+      <el-aside class="aside" width = "200px">
+        <el-image src="src\assets\icon.png" style="width: 100px; height: 100px; " :fit="fit" />
+        <div class="tabs">
+          <el-menu :default-active="activeRoute" mode="vertical" @select="handleTabClick" background-color="#324057"
+            text-color="#fff">
+            <el-menu-item index="/opcua" :exact="true">opcua</el-menu-item>
+            <el-menu-item index="/modbus" :exact="true">modbus</el-menu-item>
+            <el-menu-item index="/MC" :exact="true">Mitsubishi MC</el-menu-item>
+          </el-menu>
+        </div>
+      </el-aside>
+      <div class="content" style="height: 100%; width: 100%;">
+        <router-view></router-view>
+      </div>
+    </el-container>
   </div>
 </template>
 
 <style>
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
   background-color: #f0f0f0;
+  width: 100%;
+  height: 100%;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.aside {
+  background-color: #324057;
+  /* z-index: 1000; */
 }
 
 .tabs {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  background-color: #f1f1f1;
-  z-index: 1000;
-  padding: 0px;
-}
 
+}
 </style>

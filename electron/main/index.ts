@@ -46,7 +46,7 @@ const indexHtml = path.join(RENDERER_DIST, 'index.html')
 async function createWindow() {
   win = new BrowserWindow({
     title: 'plcMock',
-    width: 900,
+    width: 1100,
     height: 650,
     icon: path.join(process.env.VITE_PUBLIC, 'icon.ico'),
     webPreferences: {
