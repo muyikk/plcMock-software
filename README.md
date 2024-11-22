@@ -1,10 +1,10 @@
 ![image](https://github.com/muyikk/plcMock-software/blob/main/public/icon.png)
 # kl-mockplc
-模拟plc服务器的程序，可以自定义plc的结构体、变量。<br>兼容`opcua`、`modbus`、`三菱MC(待实现)`、`kl-TCP(待实现)`协议<br>并且实现设置变量的 `心跳`、`监听值并作出反馈`、`自增`、`自减`功能<br>启动服务后能够实时监控和修改所有变量的值
+模拟plc服务器的程序，可以自定义plc的结构体、变量。<br>兼容`opcua`、`modbus`、`三菱MC`、`kl-TCP(待实现)`等协议<br>并且实现设置变量的 `心跳`、`监听值并作出反馈`、`自增`、`自减`功能<br>启动服务后能够实时监控和修改所有变量的值
 
 https://github.com/muyikk/plcMock-software
 ### 一、服务名称
-plc模拟程序v1.0.0
+plc模拟程序v1.2.0
 	
 ### 二、使用方式
 1.编辑基础设置（ip、端口等）<br>
@@ -25,91 +25,8 @@ plc模拟程序v1.0.0
 #### 实时监控
 ![image](https://github.com/muyikk/plcMock-software/blob/main/IMAGE/pic4.png)
 ### 三、编辑config文件（可选）
-1、编辑自定义的opcua-data.json文件
-```json
-{
-  "name": "opcua",
-  "ip": "127.0.0.1",
-  "port": 4334,
-  "structure": "stCCD",
-  "autoPem": true,
-  "mockParams": [
-    {
-      "param": "iCCDHeart",
-      "type": "Int16",
-      "value": "1"
-    },
-    {
-      "param": "iState",
-      "type": "Int16",
-      "value": "1"
-    },
-    {
-      "param": "ichangeParam",
-      "type": "Int16",
-      "value": "1"
-    },
-    {
-      "param": "rchangeParam",
-      "type": "Double",
-      "value": "2.5"
-    },
-    {
-      "param": "inCrease",
-      "type": "Int16",
-      "value": "1"
-    },
-    {
-      "param": "deCrease",
-      "type": "Int16",
-      "value": "1"
-    }
-  ],
-  "hearts": [
-    {
-      "param": "iCCDHeart",
-      "data1": "0",
-      "data2": "1",
-      "interval": "2000"
-    }
-  ],
-  "listens": [
-    {
-      "param": "iState",
-      "data": "1",
-      "changeParam": "ichangeParam",
-      "changeValue": "1"
-    },
-    {
-      "param": "ichangeParam",
-      "data": "2",
-      "changeParam": "rchangeParam",
-      "changeValue": "1.5"
-    },
-    {
-      "param": "iState",
-      "data": "5",
-      "changeParam": "rchangeParam",
-      "changeValue": "5.5"
-    }
-  ],
-  "increase": [
-    {
-      "param": "inCrease",
-      "tolerance": "1",
-      "interval": "1000"
-    }
-  ],
-  "decrease": [
-    {
-      "param": "deCrease",
-      "tolerance": "1",
-      "interval": "1000"
-    }
-  ]
-}
+在config文件夹中，有三个预设config，对应opcua、modbus、三菱，可自行更改
 
-```
 ### Question
 #### 1、如果缺少凭证文件`privateKey.pem`和`certificate.pem`，会提示报错<br>可以选择执行重新生成自签名证书和私钥<br>在软件运行根目录执行以下代码
 ```bash
