@@ -1,6 +1,6 @@
 {
   "name": "mockPLC",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "main": "dist-electron/main/index.js",
   "description": "一个plc服务端模拟器",
   "author": "muyi",
@@ -37,14 +37,15 @@
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
-    "vue": "^3.4.21",
     "dayjs": "^1.11.13",
     "element-plus": "^2.8.7",
     "fs": "^0.0.1-security",
     "modbus-serial": "^8.0.17",
     "node-opcua": "^2.133.0",
     "path": "^0.12.7",
+    "pinia": "^2.2.6",
+    "vue": "^3.4.21",
     "vue-router": "^4.4.5",
-    "vuex": "^4.1.0"
+    "vuex": "^4.0.2"
   }
 }

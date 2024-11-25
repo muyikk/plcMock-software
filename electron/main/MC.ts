@@ -15,9 +15,9 @@ export class MockMC {
   configParams: any;
   mockParams: Object;
   listens: any; // 监听设置
-	heartBeats: object; // 心跳设置
-	increaseList: object; // 递增设置
-	decreaseList: object; // 递减设置
+  heartBeats: any; // 心跳设置
+  increaseList: any; // 递增设置
+  decreaseList: any; // 递减设置
   constructor(config) {
     this.utiles = new Utiles()
     this.host = config.host
@@ -25,10 +25,10 @@ export class MockMC {
     this.configParams = config.mockParams
     this.mockParams = this.initParams(config.mockParams)
     this.listens = config.listens;
-		this.heartBeats = config.hearts;
-		this.increaseList = config.increase;
-		this.decreaseList = config.decrease;
-   }
+    this.heartBeats = config.hearts;
+    this.increaseList = config.increase;
+    this.decreaseList = config.decrease;
+  }
 
   /**
    * 启动MC服务
@@ -82,12 +82,12 @@ export class MockMC {
       // 格式化报文
       let request = order.getReq(data)
       // 如果是写入请求
-      if(request.order == 'write') {
+      if (request.order == 'write') {
         Object.assign(this.mockParams, request.data)
         order.initRes(request)
       }
       // 如果是读取请求
-      if(order.request.order == 'read') {
+      if (order.request.order == 'read') {
         order.initRes(request, this.mockParams)
       }
       console.log(this.mockParams)
@@ -104,11 +104,11 @@ export class MockMC {
    */
   initParams(params: any) {
     let mockParams = {}
-    for(let i in params) {
-      if(params[i].type == 'short') {
+    for (let i in params) {
+      if (params[i].type == 'short') {
         let v = this.utiles.LE2BE(Number(params[i].value).toString(16).padStart(4, "0"))
         mockParams[params[i].addr] = v
-      } else if(params[i].type == 'float') {
+      } else if (params[i].type == 'float') {
         let floatValue = params[i].value
         const buffer = Buffer.alloc(4);
         buffer.writeFloatLE(floatValue, 0);  // 将浮点数写入缓冲区，使用小端序
@@ -122,74 +122,81 @@ export class MockMC {
     return mockParams
   }
 
-  	/**
-	 * 初始化心跳变量
-	 */
-	initHeartBeats() {
-		for (let heart in this.heartBeats) {
-			if (!this.configParams[heart]) {
-				console.log(`心跳参数 ${heart} 未初始化`)
-				continue
-			}
+  /**
+ * 初始化心跳变量
+ */
+  initHeartBeats() {
+    // 判断至少有一条数据
+    if (!this.heartBeats.some(obj => Object.values(obj).every(value => value !== ''))) return
+    for (let heart in this.heartBeats) {
+      if (!this.configParams[heart]) {
+        console.log(`心跳参数 ${heart} 未初始化`)
+        continue
+      }
       const param = this.configParams.find(item => item.param === this.heartBeats[heart].param)
-			let data1 = this.heartBeats[heart].data1
-			let data2 = this.heartBeats[heart].data2
-			setInterval(() => {
-				if (this.getValueMC(param.addr, param.type) == this.heartBeats[heart].data1)
-					this.setValueMC(param.param, data2);
-				else this.setValueMC(param.param, data1);
-			}, this.heartBeats[heart].interval);
-		}
-	}
+      let data1 = this.heartBeats[heart].data1
+      let data2 = this.heartBeats[heart].data2
+      setInterval(() => {
+        if (this.getValueMC(param.addr, param.type) == this.heartBeats[heart].data1)
+          this.setValueMC(param.param, data2);
+        else this.setValueMC(param.param, data1);
+      }, this.heartBeats[heart].interval);
+    }
+  }
 
-	/**
-	 * 初始化自增变量
-	 */
-	initIncreases() {
-		for (let increase in this.increaseList) {
-			if (!this.configParams[increase]) {
-				console.log(`自增参数 ${increase} 未初始化`)
-				continue
-			}
-			let tolerance = this.increaseList[increase].tolerance
+  /**
+   * 初始化自增变量
+   */
+  initIncreases() {
+    // 判断至少有一条数据
+    if (!this.increaseList.some(obj => Object.values(obj).every(value => value !== ''))) return
+    for (let increase in this.increaseList) {
+      if (!this.configParams[increase]) {
+        console.log(`自增参数 ${increase} 未初始化`)
+        continue
+      }
+      let tolerance = this.increaseList[increase].tolerance
       const param = this.configParams.find(item => item.param === this.increaseList[increase].param)
-			setInterval(() => {
-				let data = this.getValueMC(param.addr, param.type)
-				this.setValueMC(param.param, data + Number(tolerance));
-			}, this.increaseList[increase].interval);
-		}
-	}
+      setInterval(() => {
+        let data = this.getValueMC(param.addr, param.type)
+        this.setValueMC(param.param, data + Number(tolerance));
+      }, this.increaseList[increase].interval);
+    }
+  }
 
-	/**
-	 * 初始化自增变量
-	 */
-	initDecreases() {
-		for (let decrease in this.decreaseList) {
-			if (!this.configParams[decrease]) {
-				console.log(`自增参数 ${decrease} 未初始化`)
-				continue
-			}
-			let tolerance = this.decreaseList[decrease].tolerance
+  /**
+   * 初始化自增变量
+   */
+  initDecreases() {
+    // 判断至少有一条数据
+    if (!this.decreaseList.some(obj => Object.values(obj).every(value => value !== ''))) return
+    for (let decrease in this.decreaseList) {
+      if (!this.configParams[decrease]) {
+        console.log(`自增参数 ${decrease} 未初始化`)
+        continue
+      }
+      let tolerance = this.decreaseList[decrease].tolerance
       const param = this.configParams.find(item => item.param === this.decreaseList[decrease].param)
-			setInterval(() => {
-				let data = this.getValueMC(param.addr, param.type)
-				this.setValueMC(param.param, data - Number(tolerance));
-			}, this.decreaseList[decrease].interval);
-		}
-	}
-	/**
-	 * 初始化监听变量
-	 */
+      setInterval(() => {
+        let data = this.getValueMC(param.addr, param.type)
+        this.setValueMC(param.param, data - Number(tolerance));
+      }, this.decreaseList[decrease].interval);
+    }
+  }
+  /**
+   * 初始化监听变量
+   */
   initListen() {
-    if(Object.keys(this.listens).length == 0) return
-		for(let listen of this.listens) {
+    // 判断至少有一条数据
+    if (!this.listens.some(obj => Object.values(obj).every(value => value !== ''))) return
+    for (let listen of this.listens) {
       const param = this.configParams.find(item => item.param === listen.param)
-			setInterval(() => {
-				if (this.getValueMC(param.addr, param.type) == listen.data){
-					this.setValueMC(listen.changeParam, listen.changeValue)
-				} 
-			}, 200);
-		}
+      setInterval(() => {
+        if (this.getValueMC(param.addr, param.type) == listen.data) {
+          this.setValueMC(listen.changeParam, listen.changeValue)
+        }
+      }, 200);
+    }
   }
 
   /**
@@ -199,9 +206,9 @@ export class MockMC {
    * @returns 值
    */
   getValueMC(addr: string, type: string): number {
-    if(type == 'short') {
+    if (type == 'short') {
       return parseInt(this.utiles.LE2BE(this.mockParams[addr]), 16)
-    } else if(type == 'float') {
+    } else if (type == 'float') {
       const register1 = parseInt(this.mockParams[addr], 16)
       const register2 = parseInt(this.mockParams[this.utiles.getAdrrPlus1(addr)], 16)
       const buffer = Buffer.alloc(4);
@@ -221,10 +228,10 @@ export class MockMC {
    */
   setValueMC(name: string, newValue: number): void {
     const param = this.configParams.find(item => item.param === name)
-    if(param.type == 'short') {
+    if (param.type == 'short') {
       let v = this.utiles.LE2BE(Number(newValue).toString(16).padStart(4, "0"))
       this.mockParams[param.addr] = v
-    } else if(param.type == 'float') {
+    } else if (param.type == 'float') {
       let floatValue = newValue
       const buffer = Buffer.alloc(4);
       buffer.writeFloatLE(floatValue, 0);  // 将浮点数写入缓冲区，使用小端序
@@ -242,12 +249,12 @@ export class MockMC {
    */
   getRegister(addr: string, type: string): Array<any> {
     const Array = []
-    if(type == 'short'){
-      Array.push({address: addr, value: this.mockParams[addr]})
-    } else if(type == 'float') {
+    if (type == 'short') {
+      Array.push({ address: addr, value: this.mockParams[addr] })
+    } else if (type == 'float') {
       let addr1 = this.utiles.getAdrrPlus1(addr)
-      Array.push({address: addr, value: this.mockParams[addr]})
-      Array.push({address: addr1, value: this.mockParams[addr1]})
+      Array.push({ address: addr, value: this.mockParams[addr] })
+      Array.push({ address: addr1, value: this.mockParams[addr1] })
     }
     return Array
   }

@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div class="content" >
-      <el-tabs type="border-card" >
+    <div class="content">
+      <el-tabs type="border-card">
         <el-tab-pane label="基础配置">
           <div class="baseConfig">
             <!-- IP 和端口配置 -->
@@ -244,10 +244,10 @@ openssl req -x509 -newkey rsa:2048 -keyout privateKey.pem -out certificate.pem -
   <div class="footer">
     <div class="button-container">
       <div style="display: flex">
-        <el-button v-if="!isStart" size="default" type="primary" round @click="start"><el-icon>
+        <el-button v-if="!this.globalStore.$state.isStart" size="default" type="primary" round @click="start"><el-icon>
             <SwitchButton />
           </el-icon>启动服务</el-button>
-        <el-button v-if="isStart" size="default" type="danger" round @click="close"><el-icon>
+        <el-button v-if="this.globalStore.$state.isStart" size="default" type="danger" round @click="close"><el-icon>
             <SwitchButton />
           </el-icon>断开服务</el-button>
       </div>
@@ -263,12 +263,14 @@ openssl req -x509 -newkey rsa:2048 -keyout privateKey.pem -out certificate.pem -
 import { ref, onUnmounted } from 'vue'
 import viewListOPCUA from './viewListOPCUA.vue'
 import { ElNotification } from 'element-plus'
+import { useGlobalStore } from '../stores/global';
 export default {
   components: {
     viewListOPCUA,
   },
   data() {
     return {
+      globalStore: useGlobalStore(),
       name: "opcua",
       ip: "127.0.0.1",
       port: 4334,
@@ -321,7 +323,6 @@ export default {
           interval: ""
         }
       ],
-      isStart: false,
       loading: {
         save: false,
         load: false,
@@ -334,6 +335,14 @@ export default {
     };
   },
   methods: {
+    // 判断是否数据填写完整
+    hasObjectWithNoEmptyValues(obj) {
+      // 遍历对象的值，判断是否至少有一个嵌套对象的所有属性值都不为 ''
+      return Object.values(obj).some(
+        nestedObj => typeof nestedObj === 'object' && nestedObj !== null &&
+          Object.values(nestedObj).every(value => value !== '')
+      );
+    },
     // 添加操作
     addForm(fromData) {
       console.log(fromData)
@@ -387,7 +396,15 @@ export default {
       console.log(filePaths)
     },
     start() {
-      this.isStart = true
+      if (!this.hasObjectWithNoEmptyValues(this.addParams)) {
+        ElNotification({
+          title: '警告',
+          message: '请完善基本参数',
+          type: 'warning'
+        });
+        return
+      }
+      this.globalStore.$state.isStart = true
       window.ipcRenderer.startOPCUA(
         JSON.stringify({
           name: this.name,
@@ -405,7 +422,7 @@ export default {
     },
     close() {
       console.log(`vue closeOPCUA`)
-      this.isStart = false
+      this.globalStore.$state.isStart = false
       window.ipcRenderer.closeOPCUA()
     },
     view() {
@@ -456,6 +473,7 @@ export default {
         this.drawer = true
         // this.loading.start = true
       } else {
+        this.globalStore.$state.isStart = false
         console.error('Error:', response.error);
         ElNotification({
           title: '错误',
@@ -561,7 +579,6 @@ export default {
 </script>
 
 <style scoped>
-
 .baseConfig {
   padding: 10px;
   margin-bottom: 20px;
