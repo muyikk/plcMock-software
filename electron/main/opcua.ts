@@ -93,32 +93,66 @@ export class MockOPCUA {
 	 * @param {object} param 变量
 	 */
 	initParams(namespace, device, param) {
-		namespace.addVariable({
-			componentOf: device,
-			browseName: param,
-			dataType: this.mockParams[param].type,
-			value: {
-				get: () => {
-					// 参数是否在监听列表里
-					if (this.listens[param]) {
-						// 参数是否发生改变
-						if (this.listenList[param] != this.mockParams[param].value)
-							this.listen();
-					}
-					return new Variant({
-						dataType: DataType[this.mockParams[param].type],
-						value: this.mockParams[param].value,
-					});
+		// 如果是数组
+		if(this.mockParams[param].type.includes("Array")) {
+			let type = this.mockParams[param].type.replace("Array<", "").replace(">", "")
+			let value = this.mockParams[param].value
+			namespace.addVariable({
+				componentOf: device,
+				browseName: param,
+				dataType: type,
+				valueRank:1,
+				arrayDimensions: [value.length],
+				value: {
+					get: () => {
+						// 参数是否在监听列表里
+						if (this.listens[param]) {
+							// 参数是否发生改变
+							if (this.listenList[param] != this.mockParams[param].value)
+								this.listen();
+						}
+						return new Variant({
+							dataType: DataType[type],
+							value: value,
+						});
+					},
+					set: (variant) => {
+						this.mockParams[param].value = this.getType(
+							this.mockParams[param].type,
+							variant.value
+						);
+						return StatusCodes.Good;
+					},
 				},
-				set: (variant) => {
-					this.mockParams[param].value = this.getType(
-						this.mockParams[param].type,
-						variant.value
-					);
-					return StatusCodes.Good;
+			});
+		} else {
+			namespace.addVariable({
+				componentOf: device,
+				browseName: param,
+				dataType: this.mockParams[param].type,
+				value: {
+					get: () => {
+						// 参数是否在监听列表里
+						if (this.listens[param]) {
+							// 参数是否发生改变
+							if (this.listenList[param] != this.mockParams[param].value)
+								this.listen();
+						}
+						return new Variant({
+							dataType: DataType[this.mockParams[param].type],
+							value: this.mockParams[param].value,
+						});
+					},
+					set: (variant) => {
+						this.mockParams[param].value = this.getType(
+							this.mockParams[param].type,
+							variant.value
+						);
+						return StatusCodes.Good;
+					},
 				},
-			},
-		});
+			});
+		}
 	}
 
 	/**
@@ -128,6 +162,9 @@ export class MockOPCUA {
 	 * @returns
 	 */
 	getType(type, data) {
+		if(type.includes("Array"))
+			return JSON.parse(data)
+
 		switch (type) {
 			case "Int16":
 				return parseInt(data);
@@ -139,6 +176,8 @@ export class MockOPCUA {
 				return parseFloat(data);
 			case "Float":
 				return parseFloat(data);
+			case "String":
+				return data;
 		}
 	}
 
@@ -180,7 +219,7 @@ export class MockOPCUA {
 		for (let listen in this.listens) {
 			this.listens[listen].forEach((param) => {
 				// 如果改变的值 == 规则列表中的值
-				if (param.data == this.mockParams[listen].value) {
+				if (JSON.stringify(param.data) == JSON.stringify(this.mockParams[listen].value)) {
 					if (!this.mockParams[param.change.param]) {
 						console.log(`监听 ${listen} = ${this.mockParams[listen].value} 时，改变 ${param.change.param} 的变量未初始化`)
 						return

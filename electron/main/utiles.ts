@@ -51,12 +51,14 @@ export class Utiles {
 
     // 转换 mockParams
     format1.mockParams.forEach(param => {
-      if (param.type != '')
+      if (param.type != '') {
+        if(param.type.includes("Array")) param.value = JSON.parse(param.value)
         format2.params[param.param] = {
           type: param.type,
           addr: param?.addr,
-          value: Number(param.value),
+          value: param.value,
         };
+      }
     });
 
     // 转换 hearts
@@ -73,15 +75,20 @@ export class Utiles {
     for (let i in format1.listens) {
       let listen = format1.listens[i]
       if (listen.param != '') {
-
         if (!(listen.param in format2.listens)) {
           format2.listens[listen.param] = []
         }
+        if(format2.params[listen.param].type.includes("Array")) {
+          listen.data = JSON.parse(listen.data)
+        }
+        if(format2.params[listen.changeParam].type.includes("Array")) {
+          listen.changeValue = JSON.parse(listen.changeValue)
+        }
         format2.listens[listen.param].push({
-          data: Number(listen.data),
+          data: listen.data,
           change: {
             param: listen.changeParam,
-            value: Number(listen.changeValue),
+            value: listen.changeValue,
           },
         });
       }
