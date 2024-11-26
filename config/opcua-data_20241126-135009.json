@@ -1,0 +1,49 @@
+{
+  "name": "opcua",
+  "ip": "127.0.0.1",
+  "port": 4334,
+  "structure": "stCCD",
+  "autoPem": true,
+  "mockParams": [
+    {
+      "param": "test1",
+      "type": "Array<Float>",
+      "value": "[1.1,1.2,1.3]"
+    },
+    {
+      "param": "test2",
+      "type": "Array<Int16>",
+      "value": "[2,5,8]"
+    }
+  ],
+  "hearts": [
+    {
+      "param": "",
+      "data1": "",
+      "data2": "",
+      "interval": ""
+    }
+  ],
+  "listens": [
+    {
+      "param": "test1",
+      "data": "[0.1,0.2,0.3]",
+      "changeParam": "test2",
+      "changeValue": "[1,4,7]"
+    }
+  ],
+  "increase": [
+    {
+      "param": "",
+      "tolerance": "",
+      "interval": ""
+    }
+  ],
+  "decrease": [
+    {
+      "param": "",
+      "tolerance": "",
+      "interval": ""
+    }
+  ]
+}

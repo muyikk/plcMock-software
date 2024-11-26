@@ -44,6 +44,12 @@ openssl req -x509 -newkey rsa:2048 -keyout privateKey.pem -out certificate.pem -
                     <el-option label="Int64" value="Int64"></el-option>
                     <el-option label="Double" value="Double"></el-option>
                     <el-option label="Float" value="Float"></el-option>
+                    <el-option label="String" value="String"></el-option>
+                    <el-option label="Array<Int16>" value="Array<Int16>"></el-option>
+                    <el-option label="Array<Int32>" value="Array<Int32>"></el-option>
+                    <el-option label="Array<Int64>" value="Array<Int64>"></el-option>
+                    <el-option label="Array<Float>" value="Array<Float>"></el-option>
+                    <el-option label="Array<Double>" value="Array<Double>"></el-option>
                   </el-select>
                 </template>
               </el-table-column>

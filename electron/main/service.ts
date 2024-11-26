@@ -433,9 +433,18 @@ class Service {
 		ipcMain.on("updateOPCUA", (event, { param, newValue }) => {
 			try {
 				console.log(param, newValue)
-				this.OPCUAServer.mockParams[param].value = Number(newValue)
-				this.OPCUAServer.listen()
+				console.log(this.OPCUAServer.listens)
+				console.log(this.OPCUAServer.listenList)
 				// console.log(this.OPCUAServer.mockParams)
+				if(this.OPCUAServer.mockParams[param].type == 'String') {
+					this.OPCUAServer.mockParams[param].value = newValue
+				} else if (this.OPCUAServer.mockParams[param].type.includes('Array')) {
+					this.OPCUAServer.mockParams[param].value = JSON.parse(newValue)
+				} else {
+					this.OPCUAServer.mockParams[param].value = Number(newValue)
+				}
+				this.OPCUAServer.listen()
+				console.log(this.OPCUAServer.mockParams)
 				event.reply("updateOPCUA_response", { success: true });
 			} catch (error) {
 				console.error("Failed to read file:", error);
