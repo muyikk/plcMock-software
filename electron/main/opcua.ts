@@ -37,11 +37,21 @@ export class MockOPCUA {
 					this.server = new OPCUAServer({
 						port: this.port,
 						resourcePath: "/mockPLC",
+						buildInfo: {
+							productName: "MyOPCUAServer",
+							buildNumber: "1",
+							buildDate: new Date(),
+						},
 					});
 				} else {
 					this.server = new OPCUAServer({
 						port: this.port,
 						resourcePath: "/mockPLC",
+						buildInfo: {
+							productName: "MyOPCUAServer",
+							buildNumber: "1",
+							buildDate: new Date(),
+						},
 						certificateFile: "./certificate.pem",
 						privateKeyFile: "./privateKey.pem",
 					});
@@ -94,14 +104,15 @@ export class MockOPCUA {
 	 */
 	initParams(namespace, device, param) {
 		// 如果是数组
-		if(this.mockParams[param].type.includes("Array")) {
+		if (this.mockParams[param].type.includes("Array")) {
 			let type = this.mockParams[param].type.replace("Array<", "").replace(">", "")
 			let value = this.mockParams[param].value
 			namespace.addVariable({
 				componentOf: device,
 				browseName: param,
+				nodeId:`ns=1;s=mockPLC.${this.structure}.${param}`,
 				dataType: type,
-				valueRank:1,
+				valueRank: 1,
 				arrayDimensions: [value.length],
 				value: {
 					get: () => {
@@ -129,6 +140,7 @@ export class MockOPCUA {
 			namespace.addVariable({
 				componentOf: device,
 				browseName: param,
+				nodeId:`ns=1;s=mockPLC.${this.structure}.${param}`,
 				dataType: this.mockParams[param].type,
 				value: {
 					get: () => {
@@ -162,7 +174,7 @@ export class MockOPCUA {
 	 * @returns
 	 */
 	getType(type, data) {
-		if(type.includes("Array"))
+		if (type.includes("Array"))
 			return JSON.parse(data)
 
 		switch (type) {
