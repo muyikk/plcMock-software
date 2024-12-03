@@ -1,4 +1,4 @@
-![image](https://github.com/muyikk/plcMock-software/blob/main/public/icon.png)
+![image](public/icon.png)
 # kl-mockplc
 模拟plc服务器的程序，可以自定义plc的结构体、变量。<br>兼容`opcua`、`modbus`、`三菱MC`、`kl-TCP(待实现)`等协议<br>并且实现设置变量的 `心跳`、`监听值并作出反馈`、`自增`、`自减`功能<br>启动服务后能够实时监控和修改所有变量的值
 
@@ -12,18 +12,18 @@ plc模拟程序v1.2.0
 3.设置参数特性，如：心跳、监听、自增、自减 （可选）<br>
 4.config文件默认保存在`软件根目录/config/`里
 #### 心跳设置
-![image](https://github.com/muyikk/plcMock-software/blob/main/IMAGE/pic1.png)
+![image](IMAGE/pic1.png)
 <br>心跳将会在`值1`和`值2`之间以`间隔时间`反复变化
 #### 监听设置
-![image](https://github.com/muyikk/plcMock-software/blob/main/IMAGE/pic2.png)
+![image](IMAGE/pic2.png)
 <br>当监听到`参数名`的值变成`参数值`时，`被改变的参数名`的值会变为`被改变的值`
 #### 自增设置
-![image](https://github.com/muyikk/plcMock-software/blob/main/IMAGE/pic3.png)
+![image](IMAGE/pic3.png)
 <br>`参数名`的值会以`自增公差`，以`时间间隔`进行递增
 #### 自减设置
 同***自增设置***
 #### 实时监控
-![image](https://github.com/muyikk/plcMock-software/blob/main/IMAGE/pic4.png)
+![image](IMAGE/pic4.png)
 ### 三、编辑config文件（可选）
 在config文件夹中，有三个预设config，对应opcua、modbus、三菱，可自行更改
 
