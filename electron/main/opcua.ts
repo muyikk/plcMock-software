@@ -2,9 +2,11 @@ import {
 	OPCUAServer,
 	Variant,
 	DataType,
+	VariantArrayType,
+	AccessLevelExFlag,
 	StatusCodes
 } from "node-opcua";
-
+import { Utiles } from "./utiles";
 export class MockOPCUA {
 	server: OPCUAServer; // 服务器
 	port; // 端口
@@ -16,7 +18,9 @@ export class MockOPCUA {
 	heartBeats; // 心跳设置
 	increaseList; // 递增设置
 	decreaseList; // 递减设置
-	constructor(config) {
+	utiles; // 工具类
+	constructor(config, utiles) {
+		this.utiles = utiles
 		this.port = Number(config.port);
 		this.structure = config.structure;
 		this.autoPem = config.autoPem;
@@ -106,14 +110,14 @@ export class MockOPCUA {
 		// 如果是数组
 		if (this.mockParams[param].type.includes("Array")) {
 			let type = this.mockParams[param].type.replace("Array<", "").replace(">", "")
-			let value = this.mockParams[param].value
+			this.mockParams[param].value = this.utiles.stringToInt16Array(this.mockParams[param].value);
 			namespace.addVariable({
 				componentOf: device,
 				browseName: param,
 				nodeId:`ns=1;s=mockPLC.${this.structure}.${param}`,
 				dataType: type,
 				valueRank: 1,
-				arrayDimensions: [value.length],
+				arrayDimensions: [this.mockParams[param].value.length],
 				value: {
 					get: () => {
 						// 参数是否在监听列表里
@@ -124,7 +128,8 @@ export class MockOPCUA {
 						}
 						return new Variant({
 							dataType: DataType[type],
-							value: value,
+							arrayType: VariantArrayType.Array,
+							value: this.mockParams[param].value,
 						});
 					},
 					set: (variant) => {
@@ -132,6 +137,7 @@ export class MockOPCUA {
 							this.mockParams[param].type,
 							variant.value
 						);
+						console.log(this.mockParams)
 						return StatusCodes.Good;
 					},
 				},
@@ -175,8 +181,7 @@ export class MockOPCUA {
 	 */
 	getType(type, data) {
 		if (type.includes("Array"))
-			return JSON.parse(data)
-
+			return data
 		switch (type) {
 			case "Int16":
 				return parseInt(data);

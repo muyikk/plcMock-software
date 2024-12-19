@@ -396,7 +396,7 @@ class Service {
 				const config = this.utiles.cfgFormat2serFormat(JSON.parse(messageString))
 				// console.log(messageString)
 				console.log(config)
-				this.OPCUAServer = new MockOPCUA(config)
+				this.OPCUAServer = new MockOPCUA(config, this.utiles)
 				await this.OPCUAServer.initServer()
 				event.reply("startOPCUA_response", { success: true });
 			} catch (error) {
@@ -439,7 +439,7 @@ class Service {
 				if(this.OPCUAServer.mockParams[param].type == 'String') {
 					this.OPCUAServer.mockParams[param].value = newValue
 				} else if (this.OPCUAServer.mockParams[param].type.includes('Array')) {
-					this.OPCUAServer.mockParams[param].value = JSON.parse(newValue)
+					this.OPCUAServer.mockParams[param].value = this.utiles.stringToInt16Array(newValue)
 				} else {
 					this.OPCUAServer.mockParams[param].value = Number(newValue)
 				}

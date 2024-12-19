@@ -52,7 +52,7 @@ export class Utiles {
     // 转换 mockParams
     format1.mockParams.forEach(param => {
       if (param.type != '') {
-        if(param.type.includes("Array")) param.value = JSON.parse(param.value)
+        if(param.type.includes("Array")) param.value = param.value
         format2.params[param.param] = {
           type: param.type,
           addr: param?.addr,
@@ -79,10 +79,10 @@ export class Utiles {
           format2.listens[listen.param] = []
         }
         if(format2.params[listen.param].type.includes("Array")) {
-          listen.data = JSON.parse(listen.data)
+          listen.data = listen.data
         }
         if(format2.params[listen.changeParam].type.includes("Array")) {
-          listen.changeValue = JSON.parse(listen.changeValue)
+          listen.changeValue = listen.changeValue
         }
         format2.listens[listen.param].push({
           data: listen.data,
@@ -274,6 +274,27 @@ export class Utiles {
       // console.error('Invalid format');
     }
   }
+
+  /**
+   * 将字符串转换为 Int16Array 数组
+   * @param input 输入数组字符串 '[1,2,3]' | '1,2,3'
+   * @returns 
+   */
+  stringToInt16Array(input: string): Int16Array {
+    // 去除多余的空格并判断是否是带有方括号的字符串
+    let parsedArray: number[];
+
+    // 如果字符串以方括号包围
+    if (input.startsWith('[') && input.endsWith(']')) {
+        parsedArray = JSON.parse(input); // 解析为数组
+    } else {
+        // 否则按逗号分割并转换为数字
+        parsedArray = input.split(',').map(Number); // 转换为数字数组
+    }
+
+    // 返回 Int16Array
+    return new Int16Array(parsedArray);
+}
 }
 
 /**主命令+辅命令 */
